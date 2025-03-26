@@ -1,5 +1,4 @@
 import { Kanit } from "next/font/google";
-
 const kanit = Kanit({
   subsets: ["latin"],
   weight: "400",
