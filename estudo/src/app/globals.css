@@ -12,7 +12,3 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
-
-.fontPrincipal{
-  font-family: 'Kanit', sans-serif;
-}
