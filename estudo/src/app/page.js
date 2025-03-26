@@ -1,5 +1,3 @@
-import Image from "next/image";
-import {Input} from "../components/Input";
 import "../app/globals.css";
 import { Kanit } from "next/font/google";
 
