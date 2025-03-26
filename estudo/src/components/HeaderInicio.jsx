@@ -1,7 +1,8 @@
 function Header() {
     return (
-      <header className="bg-green-900 p-2">
-        <div className="bg-white flex items-center justify-between px-4 py-2 rounded-md shadow-md">
+      <header >
+        <div 
+        className="bg-white flex items-center justify-between px-4 py-2 rounded-bl-[40px] rounded-br-[40px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
           {/* Ícone de Perfil */}
           <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
             {/* Coloque aqui a imagem do perfil */}
@@ -9,7 +10,7 @@ function Header() {
   
           {/* Logo Central */}
           <div className="w-12 h-12">
-            {/* Coloque aqui a imagem do logo */}
+            <img src="/logo.png"></img>
           </div>
   
           {/* Ícones à Direita */}
