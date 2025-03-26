@@ -8,11 +8,20 @@ const kanit = Kanit({
   weight: "400",
 });
 
+
 export default function Home() {
   return (
-    <div className="bg-slate-50 h-screen">
+    <div>
       <div className={`${kanit.className}`}>
-        <h1 className="text-black">Registo</h1>
+        <Image 
+          src="/logo_ESTudo.png"
+          width={100.329}
+          height={106}
+          alt="ESTudo Logo" 
+        />
+        <h1 className="text-8xl">ESTudo</h1>
+        <p className="text-xl">University Document-Sharing App</p>
+        <Input/>
       </div>
     </div>
   );
