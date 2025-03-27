@@ -1,37 +1,50 @@
+import { Inter } from "next/font/google";
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: "400",
+});
+
 export default function LoginForm() {
     return (
         <>
-            {/*Div Palavra Login */}
-            <div className="mt-[80px] text-black">
-                <h1 className="text-center text-[64px] mb-[60px]">Login</h1>
-            </div>
+            <div className="w-full max-w-md rounded-xl shadow-md overflow-hidden">
 
-            {/*Form Login */}
-            <div className="mx-[51px]">
-                <label className="text-4xl">Email:</label><br></br>
-                <input 
-                    type="text" className="mt-2 px-[10px] bg-white w-[350px] h-[40px] rounded-[10px]" 
-                />
-            </div>
-            <div className="mx-[51px] mt-[40px]">
-                <label className="text-4xl">Password:</label><br></br>
-                <input 
-                    type="password" className="mt-2 px-[10px] bg-white w-[350px] h-[40px] rounded-[10px]" />
-            </div>
-
-            {/*Botão Login */}
-            <div className="mt-[71px] flex justify-center">
-                <a href="pag-inicial" className="block">
-                    <button type="button" className="text-4xl text-white mt-2 px-[10px] bg-[#012B55] w-[194px] h-[55px] rounded-[100px] cursor-pointer">
+                <h1 className="text-6xl pt-12 text-center">Login</h1>
+                <form className="px-8 py-10">
+                    <div className="space-y-4">
+                        <div className="w-full">
+                            <label className="block">Email:</label>
+                            <input 
+                                type="email" 
+                                className={`${inter.className} bg-white rounded-xl h-10 mt-1 w-full px-3 py-2 border border-gray-300 
+                            shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent`}/>
+                        </div>
+                        <div className="w-full">
+                            <label className="block">Password:</label>
+                            <input 
+                                type="password" 
+                                className={`${inter.className} bg-white rounded-xl h-10 mt-1 w-full px-3 py-2 border border-gray-300 
+                            shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent`}/>
+                        </div>
+                    </div>
+                    <div className="flex justify-center">
+                        <button 
+                            type="submit"
+                            className="w-1/2 mt-13 bg-[#012B55] text-white py-2 rounded-4xl hover:bg-blue-800 transition duration-300 
+                            ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-800 focus:ring-opacity-50"
+                        >
                         Login
-                    </button>
-                </a>
+                        </button>
+                    </div>
+                    <div className="flex justify-center">
+                        <div className="w-2/3 text-center mt-5">
+                            <p className="text-xl">Se não tiver ainda conta, registe-se<a href="#" className="text-white underline hover:text-blue-800 
+                            ml-1 font-medium">aqui</a>!</p>
+                        </div>
+                    </div> 
+                </form>
             </div>
-
-            {/*Div Registo */}
-            <div className="text-center h-[58px] mx-[75px] mt-[40px]">
-                <p className="text-2xl">Se ainda não tiver conta, registe-se <a href="registo" className="text-[#FFFFFF] underline">aqui</a>!</p>
-            </div>
-          </>
+        </>
     );
 }
