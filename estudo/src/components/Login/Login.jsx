@@ -10,17 +10,23 @@ const kanit = Kanit({
 
 export default function Login() {
   return (
-
     <>
-      <div className="flex justify-center">
+      {/* Logótipo */}
+      <div className={`${kanit.className} container mx-auto px-4 py-1`}>
         <Header />
-      </div>
-      <div className={`${kanit.className} flex flex-col md:flex-row justify-center min-h-screen gap-15 py-4 px-20`}>
-        <div className="w-full md:w-2/3 h-128 bg-[#012B55] rounded-2xl flex items-center justify-center text-white shadow-lg px-30">
-          <Saudacao />
-        </div>
-        <div className="w-full md:w-1/3 h-128 bg-[#28BCD3] rounded-2xl flex justify-center text-black text-xl shadow-lg">
-          <LoginForm />
+        <div className="grid grid-cols-1 md:grid-cols-[65%_35%] space-x-23 mx-auto">
+          
+          {/* Coluna de Saudação */}
+          <div className="bg-[#012B55] p-6 rounded-lg shadow-md">
+            <Saudacao />
+          </div>
+          
+          {/* Coluna do Formulário de Login */}
+          <div className="bg-[#28BCD3] p-6 rounded-lg shadow-md">
+            <h2 className="text-6xl mb-25
+            text-black text-center">Login</h2>
+            <LoginForm />
+          </div>
         </div>
       </div>
     </>
