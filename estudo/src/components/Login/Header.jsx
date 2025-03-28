@@ -9,7 +9,7 @@ const kanit = Kanit({
 export default function Header() {
   return (
     <div className={kanit.className}>
-        <div className="flex items-center justify-center py-4 mt-3 mb-4">
+        <div className="flex items-center justify-center py-4 mt-3">
             <div className="flex items-center space-x-4">
         
                 {/* Logo */}
@@ -17,8 +17,8 @@ export default function Header() {
 
                 {/* Title and Subtitle */}
                 <div>
-                    <h1 className="text-8xl">ESTudo</h1>
-                    <p className="text-xl">University Document-Sharing App</p>
+                    <h1 className="lg:text-8xl text-6xl">ESTudo</h1>
+                    <p className="lg:text-xl">University Document-Sharing App</p>
                 </div>
             </div>
         </div>
