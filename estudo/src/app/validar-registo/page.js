@@ -1,5 +1,5 @@
-import Registo from "@/components/Validar-Registo/Validar-Registo";
+import ValidarRegisto from "@/components/Validar-Registo/ValidarRegisto"
 
 export default function App() {
-    return <Validar-Registo />;
+    return <ValidarRegisto />;
 }

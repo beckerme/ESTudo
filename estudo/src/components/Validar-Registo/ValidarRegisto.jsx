@@ -1,3 +1,5 @@
+"use client"
+
 import { useState } from "react";
 import { Search, CheckCircle, XCircle, Bell, Globe } from "lucide-react";
 import { Kanit } from "next/font/google";
