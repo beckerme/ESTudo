@@ -1,8 +1,10 @@
+// Imports relacionados com páginas e fontes
 import { Kanit } from "next/font/google";
 import Header from "./Header";
 import Saudacao from "./Saudacao";
 import LoginForm from "./LoginForm";
 
+// Fonte
 const kanit = Kanit({
   subsets: ['latin'],
   weight: "400",
@@ -22,9 +24,9 @@ export default function Login() {
           </div>
           
           {/* Coluna do Formulário de Login */}
-          <div className="bg-[#28BCD3] p-6 pt-15 rounded-2xl shadow-md">
+          <div className="bg-[#28BCD3] p-6 pt-10 rounded-2xl shadow-md">
             <h2 className="text-5xl 2xl:text-6xl md:py-0
-            text-black text-center md:mb-6">Login</h2>
+            text-black text-center">Login</h2>
             <LoginForm />
           </div>
         </div>
