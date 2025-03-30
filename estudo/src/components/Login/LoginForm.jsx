@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import supabase from "@/app/config/supabaseClient";
 
 const inter = Inter({
   subsets: ['latin'],
@@ -21,31 +22,35 @@ export default function LoginForm() {
     
     // Basic validation
     if (!email || !password) {
-      setErro("Por favor, preencha todos os campos");
+      setErro("Por favor, preencha todos os campos!");
       return;
     }
     
-    try {      
-      // Comunicação com a base de dados
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+    try {
+      // Query your custom users table
+      const { data, error } = await supabase
+        .from('user')
+        .select('*')
+        .eq('email', email)
+        .single();
       
-      const data = await response.json();
-      
-      if (!response.ok) {
-        setErro("Erro ao fazer login!")
+      if (error || !data) {
+        setErro('Email ou senha incorretos! Por favor tente novamente');
+        return;
       }
       
-      // On successful login, redirect to the home page
-      router.push("/pag-inicial");
-      
-    } catch (err) {
-      setErro(err.message || "Falha na autenticação. Tente novamente.");
+      // IMPORTANT: This is NOT secure
+      if (data.password === password) {
+        
+        // Store user info in session/localStorage/state
+        sessionStorage.setItem('user', JSON.stringify(data));
+        router.push("/pag-inicial");
+      } else {
+        setErro('Email ou senha incorretos! Por favor tente novamente');
+      }
+    } catch(err) {
+      setErro("Não foi possível efetuar o login");
+      return;
     }
   };
 
@@ -95,7 +100,7 @@ export default function LoginForm() {
             <div className="text-center mt-8 xl:mt-15">
               <p className="text-2xl md:text-xl lg:text-2xl font-bold">
                 Se não tiver ainda conta, registe-se{" "}
-                <Link href="/registo" className="text-blue-600 underline hover:text-blue-800 font-medium">
+                <Link href="/registo" className="text-white underline hover:text-blue-800 font-medium">
                   aqui
                 </Link>
                 !
