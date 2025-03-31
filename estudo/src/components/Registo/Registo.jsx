@@ -1,52 +1,38 @@
+// Imports relacionados com páginas e fontes
 import { Kanit } from "next/font/google";
+import Header from "../Header";
+import Saudacao from "../Saudacao";
+import RegistoForm from "./RegistoForm";
+
+// Fonte
 const kanit = Kanit({
-  subsets: ["latin"],
+  subsets: ['latin'],
   weight: "400",
 });
-
-import Header from "../Login/Header";
 
 export default function RegisterPage() {
   return (
 
-  <div>
-    <div className={`${kanit.className} min-h-screen flex justify-center items-center p-4`}>
-      <div className="w-full max-w-6xl flex flex-col lg:flex-row p-8 rounded-3xl gap-8">
-        
-        {/* Left Section */}
-        <div className={`${kanit.className} w-full lg:w-2/3 flex items-center justify-center bg-[#012B55] rounded-3xl p-8`}>
-          <div className="text-center text-white">
-            <p className="text-3xl md:text-5xl lg:text-6xl font-bold">Bem vindo à ESTudo!</p>
-            <p className="text-lg md:text-xl mt-4">Uma aplicação de partilha de documentos inovadora!</p>
-          </div>
-        </div>
-
-        {/* Right Section */}
-        <div className={`${kanit.className} w-full lg:w-1/3 bg-cyan-500 p-8 rounded-3xl flex flex-col`}>
-          <h1 className="text-xl font-bold text-black mb-4 text-center">Registo</h1>
-          <div className="flex justify-center items-center mb-4">
-          </div>
-          <form className="flex flex-col space-y-2">
-            <input className="p-3 rounded border bg-white w-full" type="text" placeholder="Nome" />
-            <div className="flex items-center border rounded p-3 bg-white">
-              <input className="flex-1 outline-none bg-white" type="text" placeholder="Email" />
-            </div>
-            <input className="p-3 rounded border bg-white w-full" type="password" placeholder="Password" />
-            <input className="p-3 rounded border bg-white w-full" type="password" placeholder="Confirme a sua password" />
-            <input className="p-3 rounded border bg-white w-full" type="text" placeholder="Curso" />
-            <button className="mt-4 bg-blue-900 text-white py-3 rounded hover:bg-blue-800">Registar</button>
-          </form>
-          <div className="flex justify-center">
-              <div className="w-2/3 text-center mt-5">
-                <p className="text-xl">Se já tem uma conta, faça login<a href="/login" 
-                   className="text-white underline hover:text-blue-800 ml-1 font-medium">aqui</a>!
-                </p>
+    <>
+          {/* Logótipo */}
+          <div className={`${kanit.className} container mx-auto px-4 py-1`}>
+            <Header />
+            <div className="grid grid-cols-1 md:grid-cols-[65%_35%] 2xl:space-x-23 lg:space-x-10 md:space-x-5 md:space-y-0 space-y-10 mx-6 mt-5 2xl:mt-15">
+              
+              {/* Coluna de Saudação */}
+              <div className="bg-[#012B55] p-6 md:px-0 rounded-2xl shadow-md items-center flex">
+                <Saudacao />
               </div>
-          </div> 
-        </div>
-      </div>
-    </div>
-
-  </div>
+              
+              {/* Coluna do Formulário de Login */}
+              <div className="bg-[#28BCD3] p-6 pt-10 rounded-2xl shadow-md">
+                <h2 className="text-5xl 2xl:text-6xl md:py-0
+                text-black text-center">Registo</h2>
+                <RegistoForm />
+              </div>
+            </div>
+          </div>
+        </>
+  
   );
 }

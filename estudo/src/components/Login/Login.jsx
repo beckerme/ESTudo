@@ -1,7 +1,7 @@
 // Imports relacionados com páginas e fontes
 import { Kanit } from "next/font/google";
-import Header from "./Header";
-import Saudacao from "./Saudacao";
+import Header from "../Header";
+import Saudacao from "../Saudacao";
 import LoginForm from "./LoginForm";
 
 // Fonte
