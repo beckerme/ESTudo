@@ -1,10 +1,11 @@
 "use client";
 
 import { Inter } from "next/font/google";
-import { useState } from "react";
+import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import supabase from "@/app/config/supabaseClient";
+import { useEffect } from "react";
 
 const inter = Inter({
   subsets: ['latin'],
@@ -13,21 +14,63 @@ const inter = Inter({
 
 export default function RegistoForm() {
   const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmarPassword, setConfirmarPassword] = useState("");
   const [nome, setNome] = useState("");
   const [curso, setCurso] = useState("");
+
   const [erro, setErro] = useState("");
+  const [cursos, setCursos] = useState(null);
+
+    useEffect(() => {
+      const fetchCursos = async () => {
+        const { data, error } = await supabase
+          .from("curso")
+          .select("id_curso, nome_curso");
+          
+        if (error) {
+          console.error("Erro ao buscar cursos:", error);
+          setCursos([]); // Define como array vazio em caso de erro
+          return;
+        }
+        if (data) {
+          setCursos(data);
+          setErro(null); // Limpa o erro se a busca for bem-sucedida
+        }
+      };
+
+      fetchCursos(); // Chama a função para buscar os cursos
+    }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     // Basic validation
+
     if (!email || !password || !confirmarPassword || !nome || !curso) {
       setErro("Por favor, preencha todos os campos!");
       return;
     }
+
+    const { data, error } = await supabase.
+      from("users")
+      .insert({nome: nome, curso: curso, email: email, password: password});
+    
+      if (error) {
+        setErro("Erro ao registar: " + error.message);
+        return;
+      }
+
+      if (password !== confirmarPassword) {
+        setErro("As passwords não coincidem!");
+        return;
+      }
+
+      if(data){
+        setErro(null);
+        router.push("/pag-inicial");
+      }
   };
 
   return (
@@ -89,7 +132,13 @@ export default function RegistoForm() {
                 className={`${inter.className} bg-white rounded-xl h-10 mt-1 w-full px-3 pr-8 py-2 border border-gray-400
                   shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent appearance-none`}
               >
-                <option value="Ola">Ola</option>
+                <option value="">Selecione um curso</option>
+                {cursos &&
+                  cursos.map((cursoItem) => (
+                    <option key={`curso-${cursoItem.id_curso}`} value={cursoItem.nome_curso}>
+                      {cursoItem.nome_curso}
+                    </option>
+                  ))}
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 pt-6">
                 <svg
