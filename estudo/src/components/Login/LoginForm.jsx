@@ -20,34 +20,24 @@ export default function LoginForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Basic validation
     if (!email || !password) {
       setErro("Por favor, preencha todos os campos!");
       return;
     }
-    
+
     try {
-      // Query your custom users table
-      const { data, error } = await supabase
-        .from('user')
-        .select('*')
-        .eq('email', email)
-        .single();
-      
-      if (error || !data) {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
         setErro('Email ou senha incorretos! Por favor tente novamente');
         return;
       }
+
+      router.push("/pag-inicial");
       
-      // IMPORTANT: This is NOT secure
-      if (data.password === password) {
-        
-        // Store user info in session/localStorage/state
-        sessionStorage.setItem('user', JSON.stringify(data));
-        router.push("/pag-inicial");
-      } else {
-        setErro('Email ou senha incorretos! Por favor tente novamente');
-      }
     } catch(err) {
       setErro("Não foi possível efetuar o login");
       return;
