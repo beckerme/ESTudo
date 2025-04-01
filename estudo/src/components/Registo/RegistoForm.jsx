@@ -36,7 +36,7 @@ export default function RegistoForm() {
           return;
         }
         if (data) {
-          setCursos(data);
+          setCursos(data.filter(cursoItem => cursoItem.nome_curso !== "Sem Curso"));
           setErro(null); // Limpa o erro se a busca for bem-sucedida
         }
       };
@@ -50,6 +50,11 @@ export default function RegistoForm() {
 
     if (!email || !password || !confirmarPassword || !nome || !curso) {
       setErro("Por favor, preencha todos os campos!");
+      return;
+    }
+
+    if (!email.endsWith("@ipcb.pt") || email.endsWith("@ipcbcampus.pt")) { 
+      setErro("Apenas emails institucionais (@ipcb.pt ou @ipcbcampus.pt) são permitidos!");
       return;
     }
 
@@ -67,7 +72,14 @@ export default function RegistoForm() {
         return;
       }
 
-      if(data){
+      if (data) {
+        const { error: insertError } = await supabase.from("users").insert({ nome, curso, email });
+      
+        if (insertError) {
+          setErro("Erro ao salvar os dados: " + insertError.message);
+          return;
+        }
+      
         setErro(null);
         router.push("/pag-inicial");
       }
