@@ -1,29 +1,31 @@
-"use client"
+'use client';
 
-import { useState } from "react";
-import Header from "../HeaderInicio";
-import { Search, CheckCircle, XCircle, Bell, Globe } from "lucide-react";
+// Imports relacionados com páginas e fontes
 import { Kanit } from "next/font/google";
+import Header from "../HeaderInicio";
+import { useState } from 'react';
+import { Upload, Search, XCircle, CheckCircle } from 'lucide-react';
 
+// Fonte
 const kanit = Kanit({
-  subsets: ["latin"],
-  weight: "400",
+    subsets: ['latin'],
+    weight: "400",
 });
 
-const users = [
-  { name: "Maria Tavares", email: "maria.tavares@ipcbcampus.pt", role: "Engenharia Informática", color: "bg-red-500" },
-  { name: "José Campos", email: "jose.campos@ipcbcampus.pt", role: "Engenharia Civil", color: "bg-yellow-500" },
-  { name: "Raquel Teixeira", email: "raquel.teixeira@ipcbcampus.pt", role: "Professora", color: "bg-pink-500" },
+const documents = [
+    { name: "Documento A", owner: "Maria Tavares", status: "Pendente" },
+    { name: "Documento B", owner: "José Campos", status: "Pendente" },
+    { name: "Documento C", owner: "Raquel Teixeira", status: "Pendente" },
 ];
 
-export default function ValidarRegisto() {
+export default function ValidarDocumento() {
   const [search, setSearch] = useState("");
 
   return (
     <>
-      <div>
-          <Header/> 
-      </div>
+        <div>
+            <Header/> 
+        </div>
       
       {/* Caixa de Pesquisa */}
       <div className="w-full max-w-6xl mt-6 bg-blue-900 p-4 rounded-lg">
@@ -40,7 +42,7 @@ export default function ValidarRegisto() {
 
         {/* Lista de Usuários */}
         <div className="mt-4 space-y-4">
-          {users
+          {documents
             .filter((user) => user.name.toLowerCase().includes(search.toLowerCase()))
             .map((user, index) => (
               <div key={index} className="flex flex-col sm:flex-row items-center justify-between bg-blue-600 p-4 rounded-lg shadow-md">
@@ -60,7 +62,7 @@ export default function ValidarRegisto() {
             ))}
         </div>
       </div>
+    
     </>
-  );
+    );
 }
-

@@ -4,7 +4,16 @@ import supabase from "./config/supabaseClient";
 import PDFViewer from "../components/PdfViewer";
 import Script from "next/script"; // Corrige carregamento do Adobe SDK
 
+<<<<<<< HEAD
+  //teste de ligação com o supabase
+  // console.log(supabase);
+  const navigateToLogin = () => {
+    window.location.href = "/login";
+  };
+  
+=======
 export default function Home() {
+>>>>>>> 5d5c8ba647b88ece728e4a6022989a936538cb02
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', textAlign: 'center' }}>
       <div>
