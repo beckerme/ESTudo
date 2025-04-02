@@ -13,7 +13,7 @@ export default function Home() {
         <a href="/login" style={{ color: 'blue', textDecoration: 'underline' }}>Ir para a página de login</a>
 
         <h1>Visualizador de PDF</h1>
-        <PDFViewer url="https://www.thecampusqdl.com/uploads/files/pdf_sample_2.pdf" />
+        <PDFViewer url="https://catalogobandasdemusicape.wordpress.com/wp-content/uploads/2019/03/mc3a9todo-bc3a1sico-para-clarinete.pdf" />
 
         <>
           <Script
