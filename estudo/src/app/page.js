@@ -13,7 +13,7 @@ export default function Home() {
         <a href="/login" style={{ color: 'blue', textDecoration: 'underline' }}>Ir para a página de login</a>
 
         <h1>Visualizador de PDF</h1>
-        <PDFViewer url="teste.pdf" />
+        <PDFViewer url="/arquivos/teste.pdf" />
 
         {/* Carrega o SDK do Adobe corretamente */}
         <Script
