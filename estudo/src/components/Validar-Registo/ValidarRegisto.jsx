@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react";
+import Header from "../HeaderInicio";
 import { Search, CheckCircle, XCircle, Bell, Globe } from "lucide-react";
 import { Kanit } from "next/font/google";
 
@@ -19,16 +20,10 @@ export default function ValidarRegisto() {
   const [search, setSearch] = useState("");
 
   return (
-    <div className={`min-h-screen bg-gray-200 flex flex-col items-center p-4 ${kanit.className}`}>
-      {/* Cabeçalho */}
-      <header className="w-full max-w-6xl flex justify-between items-center bg-white shadow-md p-4 rounded-lg">
-        <div className="w-10 h-10 rounded-full bg-green-400"></div>
-        <img src="/logo.png" alt="Logo" className="h-10" />
-        <div className="flex gap-4">
-          <Bell className="text-gray-600" />
-          <Globe className="text-gray-600" />
-        </div>
-      </header>
+    <>
+      <div>
+          <Header/> 
+      </div>
       
       {/* Caixa de Pesquisa */}
       <div className="w-full max-w-6xl mt-6 bg-blue-900 p-4 rounded-lg">
@@ -65,7 +60,7 @@ export default function ValidarRegisto() {
             ))}
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
