@@ -2,7 +2,7 @@
 import "../app/globals.css";
 import supabase from "./config/supabaseClient";
 import PDFViewer from "../components/PdfViewer";
-import Script from "next/script"; // Adicionado para corrigir o erro
+import Script from "next/script"; // Corrige carregamento do Adobe SDK
 
 export default function Home() {
   return (
@@ -13,14 +13,14 @@ export default function Home() {
         <a href="/login" style={{ color: 'blue', textDecoration: 'underline' }}>Ir para a página de login</a>
 
         <h1>Visualizador de PDF</h1>
-        <PDFViewer url="https://catalogobandasdemusicape.wordpress.com/wp-content/uploads/2019/03/mc3a9todo-bc3a1sico-para-clarinete.pdf" />
+        <PDFViewer url="teste.pdf" />
 
-        <>
-          <Script
-            src="https://documentservices.adobe.com/view-sdk/viewer.js"
-            strategy="beforeInteractive"
-          />
-        </>
+        {/* Carrega o SDK do Adobe corretamente */}
+        <Script
+          src="https://documentservices.adobe.com/view-sdk/viewer.js"
+          strategy="lazyOnload"
+          onLoad={() => console.log("Adobe SDK carregado!")}
+        />
       </div>
     </div>
   );
