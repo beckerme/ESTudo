@@ -1,16 +1,12 @@
 "use client";
 
 import { Inter } from "next/font/google";
-import { use, useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import supabase from "@/app/config/supabaseClient";
-import { useEffect } from "react";
 
-const inter = Inter({
-  subsets: ['latin'],
-  weight: "400",
-});
+const inter = Inter({ subsets: ["latin"], weight: "400" });
 
 export default function RegistoForm() {
   const router = useRouter();
@@ -22,181 +18,121 @@ export default function RegistoForm() {
   const [curso, setCurso] = useState("");
 
   const [erro, setErro] = useState("");
-  const [cursos, setCursos] = useState(null);
+  const [cursos, setCursos] = useState([]);
 
-    useEffect(() => {
-      const fetchCursos = async () => {
-        const { data, error } = await supabase
-          .from("curso")
-          .select("id_curso, nome_curso");
-          
-        if (error) {
-          console.error("Erro ao buscar cursos:", error);
-          setCursos([]); // Define como array vazio em caso de erro
-          return;
-        }
-        if (data) {
-          setCursos(data.filter(cursoItem => cursoItem.nome_curso !== "Sem Curso"));
-          setErro(null); // Limpa o erro se a busca for bem-sucedida
-        }
-      };
+  useEffect(() => {
+    const fetchCursos = async () => {
+      const { data, error } = await supabase.from("curso").select("id_curso, nome_curso");
+      if (error) {
+        console.error("Erro ao buscar cursos:", error);
+        setCursos([]);
+      } else {
+        setCursos(data);
+      }
+    };
 
-      fetchCursos(); // Chama a função para buscar os cursos
-    }, []);
+    fetchCursos();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Basic validation
-
+  
     if (!email || !password || !confirmarPassword || !nome || !curso) {
       setErro("Por favor, preencha todos os campos!");
       return;
     }
-
-    if (!email.endsWith("@ipcb.pt") || email.endsWith("@ipcbcampus.pt")) { 
+  
+    if (!email.endsWith("@ipcb.pt") && !email.endsWith("@ipcbcampus.pt")) {
       setErro("Apenas emails institucionais (@ipcb.pt ou @ipcbcampus.pt) são permitidos!");
       return;
     }
-
-    const { data, error } = await supabase.
-      from("users")
-      .insert({nome: nome, curso: curso, email: email, password: password});
-    
-      if (error) {
-        setErro("Erro ao registar: " + error.message);
-        return;
-      }
-
-      if (password !== confirmarPassword) {
-        setErro("As passwords não coincidem!");
-        return;
-      }
-
-      if (data) {
-        const { error: insertError } = await supabase.from("users").insert({ nome, curso, email });
-      
-        if (insertError) {
-          setErro("Erro ao salvar os dados: " + insertError.message);
-          return;
-        }
-      
-        setErro(null);
-        router.push("/pag-inicial");
-      }
+  
+    if (password !== confirmarPassword) {
+      setErro("As passwords não coincidem!");
+      return;
+    }
+  
+    // Step 1: Create user in Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+  
+    if (authError) {
+      setErro("Erro ao registrar: " + authError.message);
+      return;
+    }
+  
+    // Step 2: Fetch the ID of the selected course
+    const { data: cursoData, error: cursoError } = await supabase
+      .from("curso")
+      .select("id_curso")
+      .eq("nome_curso", curso)
+      .single();
+  
+    if (cursoError || !cursoData) {
+      setErro("Erro ao obter o ID do curso: " + (cursoError?.message || "Curso não encontrado."));
+      return;
+    }
+  
+    const idCurso = cursoData.id_curso;
+  
+    // Step 3: Get the current number of users to determine new ID
+    const { count, error: countError } = await supabase
+      .from("user")
+      .select("*", { count: "exact", head: true });
+  
+    if (countError) {
+      setErro("Erro ao obter o ID do usuário: " + countError.message);
+      return;
+    }
+  
+    const newUserId = count + 1; // Define the next user ID
+  
+    // Step 4: Insert user into the 'user' table
+    const { error: insertError } = await supabase.from("user").insert({
+      id: newUserId, // Auto-incremented based on count
+      nome,
+      email,
+      password,
+      tipo_user: 4, // Default user type
+      id_curso: idCurso, // Use the fetched course ID
+    });
+  
+    if (insertError) {
+      setErro("Erro ao salvar os dados: " + insertError.message);
+      return;
+    }
+  
+    setErro(null);
+    router.push("/login");
   };
+  
 
   return (
-    <>
-      <div className="w-full max-w-2xl rounded-xl overflow-hidden">
-        <form onSubmit={handleSubmit} className="px-8 2xl:py-10 lg:py-5 w-full">
-          {erro && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-lg mb-4">
-              {erro}
-            </div>
-          )}
+    <div className="w-full max-w-2xl rounded-xl overflow-hidden">
+      <form onSubmit={handleSubmit} className="px-8 py-10 w-full">
+        {erro && <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-lg mb-4">{erro}</div>}
 
-          <div className="space-y-4">
-            <div className="w-full">
-              <label className="block">Nome:</label>
-              <input
-                type="text"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                className={`${inter.className} bg-white rounded-xl h-10 mt-1 w-full px-3 py-2 border border-gray-400
-                  shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent`}
-              />
-            </div>
-            <div className="w-full">
-              <label className="block">Email:</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={`${inter.className} bg-white rounded-xl h-10 mt-1 w-full px-3 py-2 border border-gray-400
-                  shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent`}
-              />
-            </div>
-            <div className="w-full">
-              <label className="block">Password:</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`${inter.className} bg-white rounded-xl h-10 mt-1 w-full px-3 py-2 border border-gray-400
-                  shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent`}
-              />
-            </div>
-            <div className="w-full">
-              <label className="block">Confirme a Password:</label>
-              <input
-                type="password"
-                value={confirmarPassword}
-                onChange={(e) => setConfirmarPassword(e.target.value)}
-                className={`${inter.className} bg-white rounded-xl h-10 mt-1 w-full px-3 py-2 border border-gray-400
-                  shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent`}
-              />
-            </div>
-            <div className="w-full relative">
-              <label className="block">Curso</label>
-              <select
-                value={curso}
-                onChange={(e) => setCurso(e.target.value)}
-                className={`${inter.className} bg-white rounded-xl h-10 mt-1 w-full px-3 pr-8 py-2 border border-gray-400
-                  shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent appearance-none`}
-              >
-                <option value="">Selecione um curso</option>
-                {cursos &&
-                  cursos.map((cursoItem) => (
-                    <option key={`curso-${cursoItem.id_curso}`} value={cursoItem.nome_curso}>
-                      {cursoItem.nome_curso}
-                    </option>
-                  ))}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 pt-6">
-                <svg
-                  className="h-4 w-4 text-gray-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 9l-7 7-7-7"
-                  ></path>
-                </svg>
-              </div>
-            </div>
-          </div>
+        <div className="space-y-4">
+          <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Nome" className="input-field" />
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className="input-field" />
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" className="input-field" />
+          <input type="password" value={confirmarPassword} onChange={(e) => setConfirmarPassword(e.target.value)} placeholder="Confirme a Password" className="input-field" />
+          <select value={curso} onChange={(e) => setCurso(e.target.value)} className="input-field">
+            <option value="">Selecione um curso</option>
+            {cursos.map((cursoItem) => (
+              <option key={`curso-${cursoItem.id_curso}`} value={cursoItem.nome_curso}>{cursoItem.nome_curso}</option>
+            ))}
+          </select>
+        </div>
 
-          <div className="flex justify-center md:pt-0 pt-20">
-            <button
-              type="submit"
-              className="lg:w-1/2 md:w-2/3 md:mt-10 2xl:mt-20 px-5 md:px-0 bg-[#012B55] text-white py-2 text-xl md:text-2xl 2xl:text-4xl rounded-4xl hover:bg-blue-800
-                transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-800 focus:ring-opacity-50"
-            >
-              Registar
-            </button>
-          </div>
+        <button type="submit" className="submit-button">Registar</button>
 
-          <div className="flex justify-center 2xl:px-10">
-            <div className="text-center mt-8 xl:mt-15">
-              <p className="text-2xl md:text-xl lg:text-2xl font-bold">
-                Se já tem conta, faça login{" "}
-                <Link
-                  href="/login"
-                  className="text-white underline hover:text-blue-800 font-medium"
-                >
-                  aqui
-                </Link>
-                !
-              </p>
-            </div>
-          </div>
-        </form>
-      </div>
-    </>
+        <p className="text-center mt-8">
+          Já tem conta? <Link href="/login" className="text-blue-600 underline">Faça login aqui</Link>
+        </p>
+      </form>
+    </div>
   );
 }
