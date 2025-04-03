@@ -71,9 +71,9 @@ export default function SubmeterDocumento() {
 			return
 		}
 
-		// Verifica se o tamanho máximo é 1GB
-		if (ficheiro.size > 1073741824) {
-			setErro("Tamanho máximo: 1GB");
+		// Verifica se o tamanho máximo são 50 MB
+		if (ficheiro.size > 50000000) {
+			setErro("Tamanho máximo: 50MB");
 		}
 
 		try {	

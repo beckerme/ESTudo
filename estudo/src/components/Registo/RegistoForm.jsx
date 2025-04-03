@@ -77,25 +77,11 @@ export default function RegistoForm() {
   
     const idCurso = cursoData.id_curso;
   
-    // Step 3: Get the current number of users to determine new ID
-    const { count, error: countError } = await supabase
-      .from("user")
-      .select("*", { count: "exact", head: true });
-  
-    if (countError) {
-      setErro("Erro ao obter o ID do usuário: " + countError.message);
-      return;
-    }
-  
-    const newUserId = count + 1; // Define the next user ID
-  
-    // Step 4: Insert user into the 'user' table
-    const { error: insertError } = await supabase.from("user").insert({
-      id: newUserId, // Auto-incremented based on count
+    // Step 3: Insert user into the 'user' table
+    const { error: insertError } = await supabase.from("user_details").insert({
+      id_user: authData.user.id,
       nome,
-      email,
-      password,
-      tipo_user: 4, // Default user type
+      id_tipo_user: 4, // Default user type
       id_curso: idCurso, // Use the fetched course ID
     });
   

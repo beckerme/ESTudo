@@ -1,16 +1,20 @@
-function Header() {
+import Image from "next/image";
+
+export default function HeaderInicio() {
     return (
       <header >
         <div 
-        className="bg-white flex items-center justify-between px-4 py-2 rounded-bl-[40px] rounded-br-[40px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
+        className="w-full h-[80px] bg-white flex items-center justify-between px-10 rounded-bl-[40px] rounded-br-[40px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
           {/* Ícone de Perfil */}
-          <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
-            {/* Coloque aqui a imagem do perfil */}
+
+          { /* TODO Mudar as imagens de perfil consoante o tipo de utilizador */}
+          <div className="w-12 h-12 flex items-center justify-center">
+          <Image src="/user.png" width={80} height={80} alt="foto do utilizador" />
           </div>
   
           {/* Logo Central */}
           <div className="w-12 h-12">
-            <img src="/logo.png"></img>
+            <Image src="/logo.png" width={80} height={80} alt="logotipo aplicação" />
           </div>
   
           {/* Ícones à Direita */}
@@ -18,17 +22,15 @@ function Header() {
             {/* Ícone de Notificação */}
             <div className="relative">
               <span className="absolute top-0 right-0 w-2 h-2 bg-orange-500 rounded-full"></span>
-              {/* Coloque aqui o ícone de sino */}
+              <Image src="/notification.png" width={30} height={30} alt="sino de notificações" />
             </div>
   
             {/* Bandeira de Portugal */}
-            <div className="w-8 h-5 rounded-md overflow-hidden">
-              {/* Coloque aqui a bandeira */}
+            <div className="flex w-8 h-12 items-center rounded-md overflow-hidden">
+              <Image src="/bandeira_portugal.png" width={100} height={100} alt="bandeira de Portugal" />
             </div>
           </div>
         </div>
       </header>
     );
   }
-  
-  export default Header;
