@@ -40,8 +40,8 @@ export default function ValidarDocumento() {
           <Search className="absolute right-3 top-3 text-white" />
         </div>
 
-        {/* Lista de Usuários */}
-        <div className="mt-4 space-y-4">
+        {/* Lista de Documentos */}
+        <div className="mt-4 space-y-4 ">
           {documents
             .filter((user) => user.name.toLowerCase().includes(search.toLowerCase()))
             .map((user, index) => (
