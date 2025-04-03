@@ -6,6 +6,8 @@ import { use, useState } from 'react';
 import { Upload, Search } from 'lucide-react';
 import supabase from "@/app/config/supabaseClient";
 
+
+
 // Fonte
 const kanit = Kanit({
 	subsets: ['latin'],
@@ -20,6 +22,11 @@ export default function SubmeterDocumento() {
 	const [erro, setErro] = useState("");
 	const [uploading, setUploading] = useState(false);
 	const [publicURL, setPublicURL] = useState("");
+	const [documento, setDocumento] = useState(null);
+
+	const onFileSelect = (event) => {
+		setDocumento(event.target.files[0]); // Guarda o arquivo no estado
+	  };
 
 	// Função chamada quando um user seleciona o ficheiros através de um <input type="file">
 	// A linha 23 converte a lista de ficheiros num array normal
@@ -30,6 +37,7 @@ export default function SubmeterDocumento() {
 		if (file) {
 			setFicheiro(file);
 			setNomeFicheiro(file.name);
+			setDocumento(file);
 		}
 
 		// Limpa o valor do input para permitir nova seleção do mesmo ficheiro
@@ -46,6 +54,7 @@ export default function SubmeterDocumento() {
 		if (file) {
 			setFicheiro(file);
 			setNomeFicheiro(file.name);
+			setDocumento(file);
 		}
 
 		// Limpa o valor do input para permitir nova seleção do mesmo ficheiro
@@ -108,6 +117,7 @@ export default function SubmeterDocumento() {
 			</div>
 
 			
+
 			{/* div 2 retangulos */}
 			<div className="justify-center items-center  bg-gray-200 p-30 flex flex-col">
 			
@@ -134,9 +144,17 @@ export default function SubmeterDocumento() {
 						Procurar nos Ficheiros
 						<input type="file" multiple className="hidden" onChange={handleFileChange} accept=".pdf,application/pdf" />
 					</label>
-					<button onClick={handleSubmit} disabled={uploading || !ficheiro} className="mt-4 bg-green-600 hover:bg-green-800 px-6 py-2 rounded-lg flex items-center gap-2 text-white text-2xl">
-						{uploading ? 'A processar...' : 'Submeter'} <Upload size={18} />
-					</button>
+					
+					
+					{/* Botão só aparece se um arquivo for selecionado */}
+					{documento && (
+        <button onClick={handleSubmit} disabled={uploading || !ficheiro} className="mt-4 bg-green-600 hover:bg-green-800 px-6 py-2 rounded-lg flex items-center gap-2 text-white text-2xl">
+		{uploading ? 'A processar...' : 'Submeter'} <Upload size={18} />
+	</button>
+      )}
+
+
+
 
 					{/* Mostrar o nome do ficheiro selecionado */}
 					<div className="my-10">
@@ -144,9 +162,12 @@ export default function SubmeterDocumento() {
 							<p>Ficheiro selecionado: <strong>{nomeFicheiro}</strong></p>
 						)}
 					</div>
+					
+
 				</div>
 				</form>
 			</div>
+			
 
 		</>
 	);
