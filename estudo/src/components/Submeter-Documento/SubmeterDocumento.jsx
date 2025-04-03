@@ -115,45 +115,39 @@ export default function SubmeterDocumento() {
 			<div>
 				<HeaderInicio />
 			</div>
-
 			
-
 			{/* div 2 retangulos */}
-			<div className="justify-center items-center  bg-gray-200 p-30 flex flex-col">
+			<div className="justify-center items-center  bg-gray-200 p-30 flex flex-col ">
 			
+			<div>
+			{erro && (
+					<div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-lg mb-1">
+						{erro}
+					</div>
+          		)}	
+			</div>
+
+
 			<form onSubmit={handleSubmit}>
 				{/* Retângulo pequeno */}
-				<div className=" w-[34vw] h-[1vh] bg-blue-900 text-white p-6  flex flex-col mr-127	 rounded-tr-4xl rounded-tl-4xl">
+				<div className=" w-[34vw] h-[1vh] bg-[#012B55] text-white p-6  flex flex-col mr-127	 rounded-tr-[50px] rounded-tl-4xl">
 				</div>
 
 				{/* Retângulo grande */}
-				<div className="w-[67vw] h-[50vh] bg-blue-900 text-white p-6 rounded-tr-4xl rounded-br-4xl flex flex-col items-center justify-center text-center rounded-bl-4xl"
+				<div className="w-[67vw] h-[50vh] bg-[#012B55] text-white p-6 rounded-tr-4xl rounded-br-4xl flex flex-col items-center justify-center text-center rounded-bl-4xl"
 					onDragOver={(e) => e.preventDefault()}
 					onDrop={handleDrop}
 				>
 				
-				{erro && (
-					<div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-lg mb-20">
-						{erro}
-					</div>
-          		)}
-					<p className="font-semibold text-2xl">Para submeter, podes arrastar os ficheiros!</p>
+				
+					<p className="font-semibold text-2xl mt-20">Para submeter, podes arrastar os ficheiros!</p>
 					<span className="my-2 text-2xl">ou</span>
-					<label className="cursor-pointer bg-blue-600 px-4 py-2 rounded-lg flex items-center gap-2 text-2xl">
+					<label className="cursor-pointer bg-[#0369A9] hover:bg-[#0A3C5C] px-4 py-2 rounded-full flex items-center gap-2 text-2xl">
 						<Search size={18} />
 						Procurar nos Ficheiros
 						<input type="file" multiple className="hidden" onChange={handleFileChange} accept=".pdf,application/pdf" />
 					</label>
 					
-					
-					{/* Botão só aparece se um arquivo for selecionado */}
-					{documento && (
-        <button onClick={handleSubmit} disabled={uploading || !ficheiro} className="mt-4 bg-green-600 hover:bg-green-800 px-6 py-2 rounded-lg flex items-center gap-2 text-white text-2xl">
-		{uploading ? 'A processar...' : 'Submeter'} <Upload size={18} />
-	</button>
-      )}
-
-
 
 
 					{/* Mostrar o nome do ficheiro selecionado */}
@@ -163,6 +157,12 @@ export default function SubmeterDocumento() {
 						)}
 					</div>
 					
+					{/* Botão só aparece se um arquivo for selecionado */}
+					{documento && (
+        <button onClick={handleSubmit} disabled={uploading || !ficheiro} className="mb-20 bg-green-600 hover:bg-green-800 px-6 py-2 rounded-full flex items-center gap-2 text-white text-2xl">
+		{uploading ? 'A processar...' : 'Submeter'} <Upload size={18} />
+	</button>
+      )}
 
 				</div>
 				</form>
