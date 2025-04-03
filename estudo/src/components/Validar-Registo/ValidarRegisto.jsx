@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Header from "../HeaderInicio";
-import { Search, CheckCircle, XCircle, Bell, Globe } from "lucide-react";
+import { Search, CheckCircle, XCircle } from "lucide-react";
 import { Kanit } from "next/font/google";
 
 const kanit = Kanit({
@@ -22,11 +22,11 @@ export default function ValidarRegisto() {
   return (
     <>
       <div>
-          <Header/> 
+        <Header />
       </div>
-      
+
       {/* Caixa de Pesquisa */}
-      <div className="w-full max-w-6xl mt-6 bg-blue-900 p-4 rounded-lg">
+      <div className="w-full max-w-6xl bg-blue-900 p-4 rounded-lg absolute top-[42%] left-1/2 transform -translate-x-1/2 -translate-y-1/2">
         <div className="relative">
           <input
             type="text"
@@ -63,4 +63,3 @@ export default function ValidarRegisto() {
     </>
   );
 }
-
