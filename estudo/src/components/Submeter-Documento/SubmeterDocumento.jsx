@@ -163,7 +163,7 @@ export default function SubmeterDocumento() {
 			
 			{/* Área principal de upload (pasta) */}
 			{/*ALTEREI ESTA DIV PARA TER MT-15*/}
-			<div className="flex flex-col items-center mt-15 bg-gray-200 p-30">
+			<div className="flex flex-col items-center ml-30 bg-gray-200 p-30 flex flex-col items-center justify-center">
 
 				<form onSubmit={handleSubmit}>
 					{/* Retângulo pequeno superior */}
