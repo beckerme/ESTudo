@@ -26,13 +26,41 @@ export default function LoginForm() {
     }
 
     try {
+      // Tenta fazer login
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
+      // Se o email ou a password estiverem incorretos, exibir erro
       if (error) {
-        setErro('Email ou senha incorretos! Por favor tente novamente');
+        setErro('Email ou password incorretos! Por favor tente novamente');
+        return;
+      }
+
+      // Verifica o tipo de utilizador
+      const userId = data.user.id;
+
+      // Consulta a BD para obter o tipo de user
+      const { data: userDetails, error: userDetailsError } = await supabase
+      .from('user_details')
+      .select('id_tipo_user')
+      .eq('id_user', userId)
+      .single();
+
+      // Se houver erro na verificação, desconecta o utilizador
+      if (userDetailsError) {
+        setErro("Erro ao verificar o tipo de usuário");
+        await supabase.auth.signOut();
+        router.push("/registo");
+        return;
+      }
+
+      // Verifica se o tipo de usuário é 4
+      if (userDetails.id_tipo_user === 4) {
+        setErro("Verifique o seu email e espere que o admin valide o seu registo");
+        await supabase.auth.signOut();
+        router.push("/registo");
         return;
       }
 

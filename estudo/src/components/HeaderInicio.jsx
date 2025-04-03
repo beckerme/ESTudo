@@ -14,7 +14,7 @@ export default function HeaderInicio() {
   
           {/* Logo Central */}
           <div className="w-12 h-12">
-            <Image src="/logo.png" width={80} height={80} alt="logotipo aplicação" />
+            <a href="pag-inicial"><Image src="/logo.png" width={80} height={80} alt="logotipo aplicação" /></a>
           </div>
   
           {/* Ícones à Direita */}
