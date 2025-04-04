@@ -163,17 +163,17 @@ export default function SubmeterDocumento() {
 			
 			{/* Área principal de upload (pasta) */}
 			{/*ALTEREI ESTA DIV PARA TER MT-15*/}
-			<div className="flex flex-col items-center ml-30 bg-gray-200 p-30 flex flex-col items-center justify-center">
+			<div className="h-[calc(100vh-80px)] flex items-center justify-center bg-gray-200"> 
 
 				<form onSubmit={handleSubmit}>
 					{/* Retângulo pequeno superior */}
 					{/*ALTEREI ESTA DIV PARA TER w-[25vw]*/}
-					<div className=" w-[25vw] h-[1vh] bg-[#012B55] text-white p-6  flex flex-col mr-127 rounded-tr-[50px] rounded-tl-4xl">
+					<div className="bg-[#012B55] text-white p-6  flex flex-col  rounded-tr-[50px] rounded-tl-4xl sm:w-[25vw] md:w-[25vw] ]">
 					</div>
 
 					{/* Retângulo grande inferior */}
 					{/*ALTEREI ESTA DIV PARA TER w-[50vw]*/}
-					<div className="w-[50vw] h-[50vh] bg-[#012B55] text-white p-6 rounded-tr-4xl rounded-br-4xl flex flex-col items-center justify-center text-center rounded-bl-4xl"
+					<div className="w-[50vw] h-[50vh] bg-[#012B55] text-white  rounded-tr-4xl rounded-br-4xl flex flex-col items-center justify-center text-center rounded-bl-4xl"
 						onDragOver={(e) => e.preventDefault()}
 						onDrop={handleDrop}
 					>
@@ -187,7 +187,7 @@ export default function SubmeterDocumento() {
 						
 						{/*ALTEREI ESTA DIV PARA TER MT-10*/}
 						{/* Informações para o utilizador */}
-						<p className="font-semibold text-2xl mt-10">Para submeter, pode arrastar os ficheiros</p>
+						<p className="font-semibold text-2xl ">Para submeter, pode arrastar os ficheiros</p>
 						<span className="my-2 text-2xl">ou</span>
 						
 						{/* Botão para selecionar o ficheiro */}
