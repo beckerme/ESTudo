@@ -83,6 +83,7 @@ export default function RegistoForm() {
       nome,
       id_tipo_user: 4, // Default user type
       id_curso: idCurso, // Use the fetched course ID
+      email: email,
     });
   
     if (insertError) {
