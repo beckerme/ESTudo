@@ -1,32 +1,50 @@
 'use client';
 
-// Imports relacionados com páginas e fontes
 import { Kanit } from "next/font/google";
 import Header from "../HeaderInicio";
-import { useState } from 'react';
-import { Upload, Search, XCircle, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, XCircle, CheckCircle } from 'lucide-react';
+import supabase from "@/app/config/supabaseClient";
 
 // Fonte
 const kanit = Kanit({
-    subsets: ['latin'],
-    weight: "400",
+  subsets: ['latin'],
+  weight: "400",
 });
 
-const documents = [
-    { name: "Documento A", owner: "Maria Tavares", status: "Pendente" },
-    { name: "Documento B", owner: "José Campos", status: "Pendente" },
-    { name: "Documento C", owner: "Raquel Teixeira", status: "Pendente" },
-];
 
 export default function ValidarDocumento() {
   const [search, setSearch] = useState("");
+  const [documents, setDocuments] = useState([]);
+
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      const { data, error } = await supabase
+        .from('user_documents')
+        .select(`
+          id,
+          name,
+          author,
+          estado
+        `)
+        .eq('estado', 1); // Apenas documentos com estado "por aprovar"
+
+      if (error) {
+        console.error("Erro ao buscar documentos:", error.message);
+      } else {
+        setDocuments(data);
+      }
+    };
+
+    fetchDocuments();
+  }, []);
 
   return (
     <>
-        <div>
-            <Header/> 
-        </div>
-      
+      <div>
+        <Header />
+      </div>
+
       {/* Caixa de Pesquisa Centralizada e Ajustada para Cima */}
       <div className="flex justify-center items-center min-h-screen" style={{ marginTop: '-4cm' }}>
         <div className="w-full max-w-6xl bg-blue-900 p-4 rounded-lg">
@@ -42,17 +60,17 @@ export default function ValidarDocumento() {
           </div>
 
           {/* Lista de Documentos */}
-          <div className="mt-4 space-y-4 ">
+          <div className="mt-4 space-y-4">
             {documents
-              .filter((user) => user.name.toLowerCase().includes(search.toLowerCase()))
-              .map((user, index) => (
+              .filter((doc) => doc.name.toLowerCase().includes(search.toLowerCase()))
+              .map((doc, index) => (
                 <div key={index} className="flex flex-col sm:flex-row items-center justify-between bg-blue-600 p-4 rounded-lg shadow-md">
                   <div className="flex items-center gap-4 w-full sm:w-auto">
-                    <div className={`w-12 h-12 rounded-full ${user.color}`}></div>
+                    <div className="w-12 h-12 rounded-full bg-white"></div>
                     <div className="text-center sm:text-left">
-                      <h3 className="text-white font-bold">{user.name}</h3>
-                      <p className="text-gray-300 text-sm">{user.email}</p>
-                      <p className="text-gray-400 text-xs">{user.role}</p>
+                      <h3 className="text-white font-bold">{doc.name}</h3>
+                      <p className="text-gray-300 text-sm">{doc.author}</p>
+                      <p className="text-gray-400 text-xs">Estado: Por Aprovar</p>
                     </div>
                   </div>
                   <div className="flex gap-2 mt-2 sm:mt-0">
