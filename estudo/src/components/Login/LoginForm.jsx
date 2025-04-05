@@ -50,7 +50,7 @@ export default function LoginForm() {
 
       // Se houver erro na verificação, desconecta o utilizador
       if (userDetailsError) {
-        setErro("Erro ao verificar o tipo de usuário");
+        setErro("Erro ao verificar o tipo de utilizador");
         await supabase.auth.signOut();
         router.push("/registo");
         return;
