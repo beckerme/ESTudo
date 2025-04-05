@@ -12,32 +12,47 @@ const kanit = Kanit({
   weight: "400",
 });
 
-
 export default function ValidarDocumento() {
   const [search, setSearch] = useState("");
   const [documents, setDocuments] = useState([]);
 
+  // ⚙️ Mapeamento de estados (ajusta conforme necessário!)
+  const ESTADOS = {
+    aprovado: 2,
+    nao_aprovado: 3
+  };
+
+  const fetchDocuments = async () => {
+    const { data, error } = await supabase
+      .from('user_documents')
+      .select(`id, name, author, estado`)
+      .eq('estado', 1); // Apenas documentos por aprovar
+
+    if (error) {
+      console.error("Erro ao buscar documentos:", error.message);
+    } else {
+      setDocuments(data);
+    }
+  };
+
   useEffect(() => {
-    const fetchDocuments = async () => {
-      const { data, error } = await supabase
-        .from('user_documents')
-        .select(`
-          id,
-          name,
-          author,
-          estado
-        `)
-        .eq('estado', 1); // Apenas documentos com estado "por aprovar"
-
-      if (error) {
-        console.error("Erro ao buscar documentos:", error.message);
-      } else {
-        setDocuments(data);
-      }
-    };
-
     fetchDocuments();
   }, []);
+
+  // ✅ Atualiza o estado do documento
+  const updateEstado = async (id, novoEstado) => {
+    const { error } = await supabase
+      .from('user_documents')
+      .update({ estado: novoEstado })
+      .eq('id', id);
+
+    if (error) {
+      console.error("Erro ao atualizar estado:", error.message);
+    } else {
+      // Atualiza lista local após ação
+      setDocuments(prev => prev.filter(doc => doc.id !== id));
+    }
+  };
 
   return (
     <>
@@ -45,7 +60,7 @@ export default function ValidarDocumento() {
         <Header />
       </div>
 
-      {/* Caixa de Pesquisa Centralizada e Ajustada para Cima */}
+      {/* Caixa de Pesquisa */}
       <div className="flex justify-center items-center min-h-screen" style={{ marginTop: '-4cm' }}>
         <div className="w-full max-w-6xl bg-blue-900 p-4 rounded-lg">
           <div className="relative">
@@ -74,8 +89,16 @@ export default function ValidarDocumento() {
                     </div>
                   </div>
                   <div className="flex gap-2 mt-2 sm:mt-0">
-                    <XCircle className="text-red-500 cursor-pointer" size={24} />
-                    <CheckCircle className="text-green-500 cursor-pointer" size={24} />
+                    <XCircle
+                      className="text-red-500 cursor-pointer"
+                      size={24}
+                      onClick={() => updateEstado(doc.id, ESTADOS.nao_aprovado)}
+                    />
+                    <CheckCircle
+                      className="text-green-500 cursor-pointer"
+                      size={24}
+                      onClick={() => updateEstado(doc.id, ESTADOS.aprovado)}
+                    />
                   </div>
                 </div>
               ))}
