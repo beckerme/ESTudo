@@ -21,7 +21,7 @@ export default function ValidarRegisto() {
       const { data, error } = await supabase
         .from("user_details")
         .select("id_user, nome, id_tipo_user, email, id_curso")
-        .eq("id_tipo_user", 4); // Filtra apenas os utilizadores com id_tipo_user = 4
+        .eq("id_tipo_user", 4);
 
       if (error) {
         console.error("Erro ao buscar utilizadores:", error);
@@ -70,11 +70,20 @@ export default function ValidarRegisto() {
     if (error) {
       console.error("Erro ao validar utilizador:", error);
     } else {
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user.id_user === id_user ? { ...user, id_tipo_user: novoTipoUser } : user
-        )
-      );
+      window.location.reload(); // Atualiza a página após a validação
+    }
+  };
+
+  const handleDeactivateUser = async (id_user) => {
+    const { error } = await supabase
+      .from("user_details")
+      .update({ id_tipo_user: 5 })
+      .eq("id_user", id_user);
+
+    if (error) {
+      console.error("Erro ao desativar utilizador:", error);
+    } else {
+      window.location.reload(); // Atualiza a página após a desativação
     }
   };
 
@@ -84,7 +93,6 @@ export default function ValidarRegisto() {
         <Header />
       </div>
 
-      {/* Caixa de Pesquisa */}
       <div className="w-full max-w-6xl bg-blue-900 p-4 rounded-lg absolute top-[42%] left-1/2 transform -translate-x-1/2 -translate-y-1/2">
         <div className="relative">
           <input
@@ -97,7 +105,6 @@ export default function ValidarRegisto() {
           <Search className="absolute right-3 top-3 text-white" />
         </div>
 
-        {/* Lista de Usuários */}
         <div className="mt-4 space-y-4">
           {users
             .filter((user) =>
@@ -119,7 +126,11 @@ export default function ValidarRegisto() {
                   </div>
                 </div>
                 <div className="flex gap-2 mt-2 sm:mt-0">
-                  <XCircle className="text-red-500 cursor-pointer" size={24} />
+                  <XCircle 
+                    className="text-red-500 cursor-pointer" 
+                    size={24} 
+                    onClick={() => handleDeactivateUser(user.id_user)}
+                  />
                   <CheckCircle
                     className="text-green-500 cursor-pointer"
                     size={24}
