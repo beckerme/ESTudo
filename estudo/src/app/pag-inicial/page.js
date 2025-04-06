@@ -1,3 +1,5 @@
+"use client";
+import ListaDocumentos from "@/components/ListaDocumentos";
 import Header from "../../components/HeaderInicio";
 import Input from "../../components/Input";
 
@@ -14,6 +16,8 @@ function Page() {
         <div className="mt-6">
           <Input type="search" className="px-4 py-2 border rounded-md" />
         </div>
+
+        <ListaDocumentos />
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import Script from 'next/script';
+import { useEffect, useState } from "react";
+import Script from "next/script";
 
 const PDFViewer = ({ url }) => {
   const [adobeLoaded, setAdobeLoaded] = useState(false);
@@ -7,6 +7,7 @@ const PDFViewer = ({ url }) => {
   useEffect(() => {
     if (adobeLoaded && window.AdobeDC) {
       const adobeDCView = new window.AdobeDC.View({
+       // clientId: "288835b1e4a54c15a34b9004d0053aa6", vercel
         clientId: "7b97ac0ffa3a47b08d47b91ed7021261", // localhost
         divId: "adobe-dc-view",
       });
@@ -29,16 +30,7 @@ const PDFViewer = ({ url }) => {
         onLoad={() => setAdobeLoaded(true)}
         onError={(e) => console.error("Erro ao carregar Adobe SDK", e)}
       />
-      {/* Adicionando estilo fixo para limitar o tamanho do PDF */}
-      <div
-        id="adobe-dc-view"
-        style={{
-          width: "100%",
-          height: "600px",
-          margin: "0 auto", 
-          overflow: "auto",
-        }}
-      />
+      <div id="adobe-dc-view" style={{ width: "100%", height: "600px", margin: "0 auto", overflow: "auto" }} />
     </>
   );
 };
