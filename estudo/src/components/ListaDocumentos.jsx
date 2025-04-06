@@ -94,33 +94,47 @@ export default function ListaDocumentos() {
 // Modifique o JSX para:
 return (
   <div>
-    <h1>Documentos Compartilhados</h1>
+
     {documentos.length === 0 ? (
-      <p>Nenhum documento encontrado</p>
+      <p className="text-center text-gray-600">Nenhum documento encontrado</p>
     ) : (
-      <div className="document-list">
-        {documentos.map((doc) => (
-          <div key={doc.id} className="document-item">
-            <div>
-              <h3>{doc.name}</h3>
-              <p>Autor: {doc.user_email}</p>
-              <small>
-                {new Date(doc.created_at).toLocaleDateString()}
-              </small>
-            </div>
-            <button 
-              onClick={() => visualizarDocumento(doc)}
-              className="view-button"
+      // Container de centralização
+      <div className="flex justify-center">
+        <div className="space-y-4 w-full max-w-3xl">
+          {documentos.map((doc) => (
+            <div 
+              key={doc.id}
+              className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200 mx-4"
             >
-              📄 Visualizar
-            </button>
-          </div>
-        ))}
+              <div className="flex justify-between items-start">
+                <div className="flex-1 mr-4">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-1">{doc.name}</h2>
+                  <p className="text-sm text-gray-600 mb-2">Autor: {doc.author}</p>
+                  
+                  <div className="space-y-1">
+                    <p className="text-xs text-gray-500">
+                      Criado em: {new Date(doc.created_at).toLocaleDateString('pt-PT')}
+                    </p>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => visualizarDocumento(doc)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md 
+                            transition-colors flex-shrink-0 text-sm flex items-center gap-2"
+                >
+                  <span>📄</span>
+                  Visualizar
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     )}
 
     {pdfUrl && (
-      <div className="pdf-container">
+      <div className="mt-8 border-t pt-6">
         <PDFViewer url={pdfUrl} />
       </div>
     )}
