@@ -93,52 +93,58 @@ export default function ValidarRegisto() {
         <Header />
       </div>
 
-      <div className="w-full max-w-6xl bg-blue-900 p-4 rounded-lg absolute top-[42%] left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Pesquisa"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full p-2 pl-4 rounded-lg bg-green-500 text-white placeholder-white focus:outline-none"
-          />
-          <Search className="absolute right-3 top-3 text-white" />
-        </div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="w-full max-w-4xl bg-blue-900 p-6 rounded-xl shadow-lg">
 
-        <div className="mt-4 space-y-4">
-          {users
-            .filter((user) =>
-              user.nome.toLowerCase().includes(search.toLowerCase())
-            )
-            .map((user, index) => (
-              <div
-                key={index}
-                className="flex flex-col sm:flex-row items-center justify-between bg-blue-600 p-4 rounded-lg shadow-md"
-              >
-                <div className="flex items-center gap-4 w-full sm:w-auto">
-                  <div className="w-12 h-12 rounded-full bg-blue-500"></div>
-                  <div className="text-center sm:text-left">
-                    <h3 className="text-white font-bold">{user.nome}</h3>
-                    <p className="text-gray-300 text-sm">{user.email}</p>
-                    <p className="text-gray-400 text-xs">
-                      {getCursoNomeById(user.id_curso)}
-                    </p>
+          {/* Caixa de Pesquisa */}
+          <div className="relative mb-4">
+            <input
+              type="text"
+              placeholder="Pesquisa"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full p-3 pl-4 rounded-lg bg-green-500 text-white placeholder-white focus:outline-none"
+            />
+            <Search className="absolute right-3 top-3 text-white" />
+          </div>
+
+          {/* Lista com scroll */}
+          <div className="max-h-[60vh] overflow-y-auto space-y-4 pr-2">
+            {users
+              .filter((user) =>
+                user.nome.toLowerCase().includes(search.toLowerCase())
+              )
+              .map((user, index) => (
+                <div
+                  key={index}
+                  className="flex flex-col sm:flex-row items-center justify-between bg-blue-600 p-4 rounded-lg shadow-md"
+                >
+                  <div className="flex items-center gap-4 w-full sm:w-auto">
+                    <div className="w-12 h-12 rounded-full bg-blue-500"></div>
+                    <div className="text-center sm:text-left">
+                      <h3 className="text-white font-bold">{user.nome}</h3>
+                      <p className="text-gray-300 text-sm">{user.email}</p>
+                      <p className="text-gray-400 text-xs">
+                        {getCursoNomeById(user.id_curso)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-2 sm:mt-0">
+                    <XCircle
+                      className="text-red-500 cursor-pointer"
+                      size={24}
+                      onClick={() => handleDeactivateUser(user.id_user)}
+                    />
+                    <CheckCircle
+                      className="text-green-500 cursor-pointer"
+                      size={24}
+                      onClick={() => handleValidateUser(user.id_user, user.email)}
+                    />
                   </div>
                 </div>
-                <div className="flex gap-2 mt-2 sm:mt-0">
-                  <XCircle 
-                    className="text-red-500 cursor-pointer" 
-                    size={24} 
-                    onClick={() => handleDeactivateUser(user.id_user)}
-                  />
-                  <CheckCircle
-                    className="text-green-500 cursor-pointer"
-                    size={24}
-                    onClick={() => handleValidateUser(user.id_user, user.email)}
-                  />
-                </div>
-              </div>
-            ))}
+              ))}
+          </div>
+
         </div>
       </div>
     </>

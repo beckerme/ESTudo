@@ -16,10 +16,10 @@ export default function ValidarDocumento() {
   const [search, setSearch] = useState("");
   const [documents, setDocuments] = useState([]);
 
-  // ⚙️ Mapeamento de estados (ajusta conforme necessário!)
+  // Mapeamento de estados
   const ESTADOS = {
-    aprovado: 2,
-    nao_aprovado: 3
+    publicado: 2,
+    nao_aprovado: 3,
   };
 
   const fetchDocuments = async () => {
@@ -39,7 +39,7 @@ export default function ValidarDocumento() {
     fetchDocuments();
   }, []);
 
-  // ✅ Atualiza o estado do documento
+  // Atualiza o estado do documento
   const updateEstado = async (id, novoEstado) => {
     const { error } = await supabase
       .from('user_documents')
@@ -50,7 +50,7 @@ export default function ValidarDocumento() {
       console.error("Erro ao atualizar estado:", error.message);
     } else {
       // Atualiza lista local após ação
-      setDocuments(prev => prev.filter(doc => doc.id !== id));
+      setDocuments((prev) => prev.filter((doc) => doc.id !== id));
     }
   };
 
@@ -61,25 +61,31 @@ export default function ValidarDocumento() {
       </div>
 
       {/* Caixa de Pesquisa */}
-      <div className="flex justify-center items-center min-h-screen" style={{ marginTop: '-4cm' }}>
-        <div className="w-full max-w-6xl bg-blue-900 p-4 rounded-lg">
-          <div className="relative">
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="w-full max-w-4xl bg-blue-900 p-6 rounded-xl shadow-lg">
+          {/* Caixa de Pesquisa */}
+          <div className="relative mb-4">
             <input
               type="text"
               placeholder="Pesquisa"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full p-2 pl-4 rounded-lg bg-green-500 text-white placeholder-white focus:outline-none"
+              className="w-full p-3 pl-4 rounded-lg bg-green-500 text-white placeholder-white focus:outline-none"
             />
             <Search className="absolute right-3 top-3 text-white" />
           </div>
 
-          {/* Lista de Documentos */}
-          <div className="mt-4 space-y-4">
+          {/* Lista com scroll */}
+          <div className="max-h-[60vh] overflow-y-auto space-y-4 pr-2">
             {documents
-              .filter((doc) => doc.name.toLowerCase().includes(search.toLowerCase()))
+              .filter((doc) =>
+                doc.name.toLowerCase().includes(search.toLowerCase())
+              )
               .map((doc, index) => (
-                <div key={index} className="flex flex-col sm:flex-row items-center justify-between bg-blue-600 p-4 rounded-lg shadow-md">
+                <div
+                  key={index}
+                  className="flex flex-col sm:flex-row items-center justify-between bg-blue-600 p-4 rounded-lg shadow-md"
+                >
                   <div className="flex items-center gap-4 w-full sm:w-auto">
                     <div className="w-12 h-12 rounded-full bg-white"></div>
                     <div className="text-center sm:text-left">
@@ -97,7 +103,7 @@ export default function ValidarDocumento() {
                     <CheckCircle
                       className="text-green-500 cursor-pointer"
                       size={24}
-                      onClick={() => updateEstado(doc.id, ESTADOS.aprovado)}
+                      onClick={() => updateEstado(doc.id, ESTADOS.publicado)}
                     />
                   </div>
                 </div>
