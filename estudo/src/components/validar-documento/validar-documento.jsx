@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { Kanit } from "next/font/google";
 import Header from "../HeaderInicio";
@@ -18,6 +18,7 @@ export default function ValidarDocumento() {
 
   // Mapeamento de estados
   const ESTADOS = {
+    por_aprovar: 1,
     publicado: 2,
     nao_aprovado: 3,
   };
@@ -26,7 +27,7 @@ export default function ValidarDocumento() {
     const { data, error } = await supabase
       .from('user_documents')
       .select(`id, name, author, estado`)
-      .eq('estado', 1); // Apenas documentos por aprovar
+      .in('estado', [ESTADOS.por_aprovar, ESTADOS.publicado]); // Buscar por aprovar e publicados
 
     if (error) {
       console.error("Erro ao buscar documentos:", error.message);
@@ -54,6 +55,17 @@ export default function ValidarDocumento() {
     }
   };
 
+  const getEstadoLabel = (estado) => {
+    switch (estado) {
+      case ESTADOS.por_aprovar:
+        return "Por Aprovar";
+      case ESTADOS.publicado:
+        return "Publicado";
+      default:
+        return "Desconhecido";
+    }
+  };
+
   return (
     <>
       <div>
@@ -63,7 +75,6 @@ export default function ValidarDocumento() {
       {/* Caixa de Pesquisa */}
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="w-full max-w-4xl bg-blue-900 p-6 rounded-xl shadow-lg">
-          {/* Caixa de Pesquisa */}
           <div className="relative mb-4">
             <input
               type="text"
@@ -91,21 +102,27 @@ export default function ValidarDocumento() {
                     <div className="text-center sm:text-left">
                       <h3 className="text-white font-bold">{doc.name}</h3>
                       <p className="text-gray-300 text-sm">{doc.author}</p>
-                      <p className="text-gray-400 text-xs">Estado: Por Aprovar</p>
+                      <p className="text-gray-400 text-xs">
+                        Estado: {getEstadoLabel(doc.estado)}
+                      </p>
                     </div>
                   </div>
-                  <div className="flex gap-2 mt-2 sm:mt-0">
-                    <XCircle
-                      className="text-red-500 cursor-pointer"
-                      size={24}
-                      onClick={() => updateEstado(doc.id, ESTADOS.nao_aprovado)}
-                    />
-                    <CheckCircle
-                      className="text-green-500 cursor-pointer"
-                      size={24}
-                      onClick={() => updateEstado(doc.id, ESTADOS.publicado)}
-                    />
-                  </div>
+
+                  {/* Botões só aparecem se o documento estiver por aprovar */}
+                  {doc.estado === ESTADOS.por_aprovar && (
+                    <div className="flex gap-2 mt-2 sm:mt-0">
+                      <XCircle
+                        className="text-red-500 cursor-pointer"
+                        size={24}
+                        onClick={() => updateEstado(doc.id, ESTADOS.nao_aprovado)}
+                      />
+                      <CheckCircle
+                        className="text-green-500 cursor-pointer"
+                        size={24}
+                        onClick={() => updateEstado(doc.id, ESTADOS.publicado)}
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
           </div>
