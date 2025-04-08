@@ -136,6 +136,7 @@ export default function SubmeterDocumento() {
 				name: ficheiro.name,
 				author: userData.nome,
 				size: ficheiro.size,
+				estado: 1,
 			}
 
 			// Inserir os dados na BD
