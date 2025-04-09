@@ -4,10 +4,10 @@ const kanit = Kanit({
     weight: "400",
   });
 
-export const Input = () =>{
+export const BarraPesquisa = () =>{
     return <input 
             className={`bg-[#007CC2] rounded-3xl w-[49vw] h-[6vh] px-3 placeholder:text-white placeholder:${kanit.className}`}
             placeholder="Pesquise por apontamentos"/>
 }
 
-export default Input;
+export default BarraPesquisa;

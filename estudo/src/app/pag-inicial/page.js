@@ -1,7 +1,7 @@
 "use client";
 import ListaDocumentos from "@/components/ListaDocumentos";
 import Header from "../../components/HeaderInicio";
-import Input from "../../components/Input";
+import BarraPesquisa from "../../components/BarraPesquisa";
 
 function Page() {
   return (
@@ -14,7 +14,7 @@ function Page() {
           <p className="text-lg text-gray-700 mt-2">University Document-Sharing App</p>
         </div>
         <div className="mt-6">
-          <Input type="search" className="px-4 py-2 border rounded-md" />
+          <BarraPesquisa type="search" className="px-4 py-2 border rounded-md" />
         </div>
       </div>
     </div>
