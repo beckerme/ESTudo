@@ -1,9 +1,8 @@
 "use client";
 import Image from "next/image";
 import HeaderInicio from "../HeaderInicio";
-import ListaDocumentos from "../ListaDocumentos";
 import { Kanit } from "next/font/google";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import supabase from "@/app/config/supabaseClient";
 import TempoRelativo from "./TempoRelativo";
 import { useSearchParams } from "next/navigation";
@@ -12,42 +11,53 @@ import PDFViewer from "../PdfViewer";
 // Font
 const kanit = Kanit({
     subsets: ['latin'],
-    weight: ["400","700","800"],
+    weight: ["400", "700", "800"],
 });
 
-
 export default function ConsultarDocumento() {
-
-    /* -------------------------------------------------------------------------------- BACKEND -------------------------------------------------------------- */
-
-    // Estados para gerir os comentários
     const [comentario, setComentario] = useState("");
     const [comentarios, setComentarios] = useState([]);
     const [erro, setErro] = useState("");
+    const [isClient, setIsClient] = useState(false);
+    const [pdfUrl, setPdfUrl] = useState("");
+    const [titulo, setTitulo] = useState("Documento Sem Título");
+    const [autor, setAutor] = useState("Autor Desconhecido");
+
     const searchParams = useSearchParams();
-    const pdfUrl = searchParams.get("pdf");
-    const titulo = searchParams.get("titulo") || "Documento Sem Título";
-    const autor = searchParams.get("autor") || "Autor Desconhecido";
 
-    // Carrega os comentários da base de dados
-    const fetchComentarios = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('comment_user')
-                .select('*')
-                .order('created_at', { ascending: true });
-            
-            if (error) throw error;
-            
-            setComentarios(data || []);
-        } catch (error) {
-            setErro("Erro ao carregar comentários: " + error.message);
+    // Executar apenas no lado do cliente
+    useEffect(() => {
+        setIsClient(true);
+        if (searchParams) {
+            const pdf = searchParams.get("pdf");
+            const title = searchParams.get("titulo");
+            const author = searchParams.get("autor");
+
+            setPdfUrl(pdf || "");
+            setTitulo(title || "Documento Sem Título");
+            setAutor(author || "Autor Desconhecido");
         }
-    };
-    
-    fetchComentarios();
+    }, [searchParams]);
 
-    // Função para obter o ID do utilizador atual
+    useEffect(() => {
+        const fetchComentarios = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('comment_user')
+                    .select('*')
+                    .order('created_at', { ascending: true });
+
+                if (error) throw error;
+
+                setComentarios(data || []);
+            } catch (error) {
+                setErro("Erro ao carregar comentários: " + error.message);
+            }
+        };
+
+        fetchComentarios();
+    }, []);
+
     const getCurrentUserId = async () => {
         const { data: { user }, error } = await supabase.auth.getUser();
         if (error) throw error;
@@ -56,102 +66,84 @@ export default function ConsultarDocumento() {
 
     const addComment = async (e) => {
         e.preventDefault();
-
         if (!comentario.trim()) {
             setErro("Por favor, escreva um comentário");
             return;
         }
 
         try {
-            // Obtem as informações do utilizador
             const userId = await getCurrentUserId();
             const { data: userData, error: userDataError } = await supabase
                 .from('user_details')
                 .select('nome')
                 .eq('id_user', userId)
                 .maybeSingle();
-            
+
             if (userDataError) throw userDataError;
 
-            // Prepara os dados do comentário para serem inseridos na BD
             const sendComment = {
                 created_at: new Date(),
                 text: comentario,
                 user_id: userId,
                 author: userData.nome,
-            }
+            };
 
-            // Insere os comentários na BD
             const { data: novoComentario, error } = await supabase
                 .from('comment_user')
                 .insert([sendComment])
                 .select()
                 .single();
-            
-            if (error) throw error;
-            
-            // Atualiza a lista de comentários
-            setComentarios([novoComentario, ...comentarios]);
 
-            // Apaga o campo do input de comentar dps da submissão do mesmo
+            if (error) throw error;
+
+            setComentarios([novoComentario, ...comentarios]);
             setComentario("");
             setErro("");
-            
+
         } catch (error) {
             setErro("Erro: " + error.message);
         }
-    }
+    };
 
     return (
-        /* -------------------------------------------------------------------------- FRONTEND ---------------------------------------------------------------- */
-
         <>
             <HeaderInicio />
             <div className={`${kanit.className} w-full min-h-[calc(100vh-80px)] flex items-center`}>
                 <div className="container mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-20">
-                        {/* Div Documento */}
                         <div className="bg-[#012B55] lg:col-span-3 rounded-xl shadow-lg overflow-hidden w-9/10">
-                            {/* Título e Autor */}
                             <div className="p-6 md:p-10 w-3/4 flex mx-auto flex-col">
                                 <h1 className="text-white font-extrabold text-3xl md:text-5xl">{titulo}</h1>
-                                <p className="py-2 text-white text-xl md:text-2xl"><strong>Autor:</strong>{autor}</p>
+                                <p className="py-2 text-white text-xl md:text-2xl"><strong>Autor:</strong> {autor}</p>
 
-                                {/* Conteúdo Documento */}
                                 <div className="mt-2 bg-[#0369A9] rounded-lg flex items-center justify-center h-[50vh] md:h-[60vh]">
-                                    {pdfUrl ? (
+                                    {isClient && pdfUrl ? (
                                         <PDFViewer url={pdfUrl} />
-                                            ) : (
-                                        <p className="text-white text-xl">Nenhum documento selecionado</p>
-                                )}
+                                    ) : (
+                                        <p className="text-white text-xl">Carregando documento...</p>
+                                    )}
                                 </div>
                             </div>
                         </div>
-                        
-                        {/* Div Comentário e Avaliação */}
-                        <div className="bg-[#012B55] rounded-xl shadow-lg overflow-hidden flex flex-col px-5">
 
-                            {/* Avaliação */}
+                        <div className="bg-[#012B55] rounded-xl shadow-lg overflow-hidden flex flex-col px-5">
                             <div className="py-10 text-center">
                                 <div className="flex justify-center items-center">
                                     <span className="text-white text-4xl font-bold">4,5/5</span>
-                                    <Image src="/star.png" width={30} height={30} alt="estrela" className="w-8 h-8 ml-2"/>
+                                    <Image src="/star.png" width={30} height={30} alt="estrela" className="w-8 h-8 ml-2" />
                                 </div>
                                 <div className="flex justify-center mt-2">
                                     <Image src="/5_stars.png" width={200} height={40} alt="rating de 4,5 estrelas" className="h-8" />
                                 </div>
                             </div>
-                            
-                            {/* Div Comentário */}
-                            <div className="flex flex-col">
 
+                            <div className="flex flex-col">
                                 <div className="flex-grow max-h-[50vh] overflow-y-auto px-4 py-2 ">
-                                    {/* Mostra comentários existentes */}
                                     {comentarios.length > 0 ? (
                                         comentarios.map((comment, index) => (
                                             <div key={index} className="mb-10 transition-all duration-300">
                                                 <div className="flex items-center">
-                                                    <Image src="/user.png" width={30} height={30} alt="foto de perfil" className="w-8 h-8"/>
+                                                    <Image src="/user.png" width={30} height={30} alt="foto de perfil" className="w-8 h-8" />
                                                     <span className="ml-2 text-xl text-white">{comment.author}</span>
                                                 </div>
                                                 <div className="mt-2 bg-[#0369A9] rounded-3xl p-4 text-white">
@@ -173,13 +165,12 @@ export default function ConsultarDocumento() {
                                     )}
                                 </div>
 
-                                {/* Adicionar Comentário */}
                                 <div className="mb-5 px-2 py-10">
-                                <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                                    <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
                                         <div className="flex-grow bg-white text-black rounded-full py-2 px-4 shadow-md">
                                             <form onSubmit={addComment} className="w-full">
-                                                <input 
-                                                    type="text" 
+                                                <input
+                                                    type="text"
                                                     placeholder="Adicione um Comentário"
                                                     className="w-full bg-transparent outline-none text-sm sm:text-base"
                                                     value={comentario}
@@ -188,11 +179,11 @@ export default function ConsultarDocumento() {
                                             </form>
                                         </div>
                                         <div className="flex justify-end sm:justify-center">
-                                            <button 
+                                            <button
                                                 className="p-1 hover:scale-110 transition-transform"
                                                 onClick={addComment}
                                             >
-                                                <Image src="/send.png" width={40} height={40} alt="enviar"/>
+                                                <Image src="/send.png" width={40} height={40} alt="enviar" />
                                             </button>
                                         </div>
                                     </div>
