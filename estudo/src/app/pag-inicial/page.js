@@ -17,6 +17,9 @@ function Page() {
           <BarraPesquisa type="search" className="px-4 py-2 border rounded-md" />
         </div>
       </div>
+      <div className="py-6">
+        <ListaDocumentos />
+      </div>
     </div>
   );
 }

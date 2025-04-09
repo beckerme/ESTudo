@@ -6,12 +6,15 @@ import { Kanit } from "next/font/google";
 import React, { useState } from 'react';
 import supabase from "@/app/config/supabaseClient";
 import TempoRelativo from "./TempoRelativo";
+import { useSearchParams } from "next/navigation";
+import PDFViewer from "../PdfViewer";
 
 // Font
 const kanit = Kanit({
     subsets: ['latin'],
     weight: ["400","700","800"],
 });
+
 
 export default function ConsultarDocumento() {
 
@@ -21,6 +24,10 @@ export default function ConsultarDocumento() {
     const [comentario, setComentario] = useState("");
     const [comentarios, setComentarios] = useState([]);
     const [erro, setErro] = useState("");
+    const searchParams = useSearchParams();
+    const pdfUrl = searchParams.get("pdf");
+    const titulo = searchParams.get("titulo") || "Documento Sem Título";
+    const autor = searchParams.get("autor") || "Autor Desconhecido";
 
     // Carrega os comentários da base de dados
     const fetchComentarios = async () => {
@@ -107,12 +114,16 @@ export default function ConsultarDocumento() {
                         <div className="bg-[#012B55] lg:col-span-3 rounded-xl shadow-lg overflow-hidden w-9/10">
                             {/* Título e Autor */}
                             <div className="p-6 md:p-10 w-3/4 flex mx-auto flex-col">
-                                <h1 className="text-white font-extrabold text-3xl md:text-5xl">Melhores Apontamentos POO</h1>
-                                <p className="py-2 text-white text-xl md:text-2xl"><strong>Autor:</strong> Felizbelo</p>
+                                <h1 className="text-white font-extrabold text-3xl md:text-5xl">{titulo}</h1>
+                                <p className="py-2 text-white text-xl md:text-2xl"><strong>Autor:</strong>{autor}</p>
 
                                 {/* Conteúdo Documento */}
                                 <div className="mt-2 bg-[#0369A9] rounded-lg flex items-center justify-center h-[50vh] md:h-[60vh]">
-                                    <span className="text-5xl md:text-6xl text-white"><ListaDocumentos/></span>
+                                    {pdfUrl ? (
+                                        <PDFViewer url={pdfUrl} />
+                                            ) : (
+                                        <p className="text-white text-xl">Nenhum documento selecionado</p>
+                                )}
                                 </div>
                             </div>
                         </div>

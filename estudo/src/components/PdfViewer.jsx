@@ -30,7 +30,7 @@ const PDFViewer = ({ url }) => {
         onLoad={() => setAdobeLoaded(true)}
         onError={(e) => console.error("Erro ao carregar Adobe SDK", e)}
       />
-      <div id="adobe-dc-view" style={{ width: "100%", height: "600px", margin: "0 auto", overflow: "auto" }} />
+     <div id="adobe-dc-view" style={{ width: "100%", height: "480px", margin: "0 auto", overflow: "auto" }} />
     </>
   );
 };

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import supabase from "../app/config/supabaseClient";
 import PDFViewer from "./PdfViewer";
+import { useRouter } from "next/navigation";
 
 export default function ListaDocumentos() {
   const [documentos, setDocumentos] = useState([]);
@@ -8,6 +9,7 @@ export default function ListaDocumentos() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     const checkSession = async () => {
@@ -28,7 +30,7 @@ export default function ListaDocumentos() {
     checkSession();
   }, []);
 
-  // Função modificada para buscar todos os documentos
+  // busca todos os documentos da base de dados
   const fetchDocs = async () => {
     try {
       setLoading(true);
@@ -57,10 +59,8 @@ export default function ListaDocumentos() {
 
   const visualizarDocumento = async (documento) => {
     try {
-      // Caminho direto na raiz do bucket
       const filePath = documento.name;
-      
-      // Verificação de existência
+  
       const { data: fileList, error: listError } = await supabase
         .storage
         .from('documentos')
@@ -72,7 +72,6 @@ export default function ListaDocumentos() {
         throw new Error("Arquivo não encontrado no repositório");
       }
   
-      // Obter URL assinada
       const { data, error } = await supabase
         .storage
         .from('documentos')
@@ -80,7 +79,11 @@ export default function ListaDocumentos() {
   
       if (error) throw error;
   
-      setPdfUrl(data.signedUrl);
+      // Redireciona para a página com o link do PDF na query string abaixo :)
+      router.push(`/consultar-doc?pdf=${encodeURIComponent(data.signedUrl)}&titulo=${encodeURIComponent(documento.name)}&autor=${encodeURIComponent(documento.author)}`);
+
+
+  
     } catch (err) {
       console.error("Erro detalhado:", err);
       alert(`Erro ao abrir: ${err.message}`);
@@ -91,7 +94,6 @@ export default function ListaDocumentos() {
   if (error) return <div>Erro: {error}</div>;
   if (!user) return <div>Por favor, faça login para acessar os documentos</div>;
 
-// Modifique o JSX para:
 return (
   <div>
 
