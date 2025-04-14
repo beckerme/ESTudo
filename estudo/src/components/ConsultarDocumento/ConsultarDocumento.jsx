@@ -46,18 +46,20 @@ export default function ConsultarDocumento() {
                     .from('comment_user')
                     .select('*')
                     .order('created_at', { ascending: true });
-
+    
                 if (error) throw error;
-
+    
                 setComentarios(data || []);
             } catch (error) {
                 setErro("Erro ao carregar comentários: " + error.message);
             }
         };
-
-        fetchComentarios();
-    }, []);
-
+    
+        if (pdfUrl) {
+            fetchComentarios();
+        }
+    }, [pdfUrl]);
+    
     const getCurrentUserId = async () => {
         const { data: { user }, error } = await supabase.auth.getUser();
         if (error) throw error;
