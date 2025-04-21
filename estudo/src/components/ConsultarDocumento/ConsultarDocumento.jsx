@@ -7,6 +7,7 @@ import supabase from "@/app/config/supabaseClient";
 import TempoRelativo from "./TempoRelativo";
 import { useSearchParams } from "next/navigation";
 import PDFViewer from "../PdfViewer";
+import { FaStar, FaRegStar } from "react-icons/fa";
 
 // Configuração da Fonte para o Projeto
 const kanit = Kanit({
@@ -26,6 +27,8 @@ export default function ConsultarDocumento() {
     const [titulo, setTitulo] = useState("Documento Sem Título");   // Título do documento
     const [autor, setAutor] = useState("Autor Desconhecido");       // Autor do documento
     const [tipoUtilizador, setTipoUtilizador] = useState(null);     // Tipo de utilizador (ex: 1-admin, 2-moderador, 3-aluno, 4-user_nao_validado, 5-user_inativo)
+    const [avaliacao, setAvaliacao] = useState(0);                  // Avaliação do documento
+    const [avaliacaoHover, setAvaliacaoHover] = useState(0);                         // Avaliação em hover
 
     // Obter os parâmetros da URL
     const searchParams = useSearchParams();
@@ -247,12 +250,34 @@ export default function ConsultarDocumento() {
 
                             {/* Secção de avaliação */}
                             <div className="py-10 text-center">
-                                <div className="flex justify-center items-center">
-                                    <span className="text-white text-4xl font-bold">4,5/5</span>
-                                    <Image src="/star.png" width={30} height={30} alt="estrela" className="w-8 h-8 ml-2" />
+                                <div className="flex justify-center items-center mb-4">
+                                    {/* Avaliação em Hover */}
+                                    <span className="text-white text-4xl font-bold">{avaliacao > 0 ? `${avaliacao}/5` : "Avalie"}</span>
                                 </div>
-                                <div className="flex justify-center mt-2">
-                                    <Image src="/5_stars.png" width={200} height={40} alt="rating de 4,5 estrelas" className="h-8" />
+
+                                {/* Estrelas de avaliação (com react-icons) */}
+                                <div className="flex justify-center">
+                                    {[...Array(5)].map((_, index) => {
+                                        const valorAvaliacao = index + 1;
+                                        return (
+                                            <label key={index}>
+                                                <input
+                                                    type="radio"
+                                                    name="rating"
+                                                    value={valorAvaliacao}
+                                                    onClick={() => setAvaliacao(valorAvaliacao)}
+                                                    className="hidden"
+                                                />
+                                                <span
+                                                    onMouseEnter={() => setAvaliacaoHover(valorAvaliacao)}
+                                                    onMouseLeave={() => setAvaliacaoHover(null)}
+                                                    className="cursor-pointer text-yellow-400 text-3xl transition-transform hover:scale-110"
+                                                >
+                                                    {valorAvaliacao <= (avaliacaoHover || avaliacao) ? <FaStar /> : <FaRegStar />}
+                                                </span>
+                                            </label>
+                                        );
+                                    })}
                                 </div>
                             </div>
 
