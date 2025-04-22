@@ -5,6 +5,8 @@ import Header from "../HeaderInicio";
 import { Search, CheckCircle, XCircle } from "lucide-react";
 import { Kanit } from "next/font/google";
 import supabase from "@/app/config/supabaseClient";
+import { useRouter } from "next/navigation"; // ⚠️ NOTA: Se usares App Router
+
 
 const kanit = Kanit({
   subsets: ["latin"],
@@ -86,6 +88,46 @@ export default function ValidarRegisto() {
       window.location.reload(); // Atualiza a página após a desativação
     }
   };
+
+
+  
+
+
+
+const router = useRouter();
+
+useEffect(() => {
+	const verificarTipoUser = async () => {
+		const { data: { user }, error } = await supabase.auth.getUser();
+		if (error || !user) {
+			router.push("/login"); // Ou redirecionar para login, se não autenticado
+			return;
+		}
+
+		const { data: userDetails, error: userDetailsError } = await supabase
+			.from("user_details")
+			.select("id_tipo_user")
+			.eq("id_user", user.id)
+			.single();
+
+		if (userDetailsError || !userDetails) {
+			router.push("/erro"); // Página genérica de erro
+			return;
+		}
+
+		const { data: tipoUserData, error: tipoUserError } = await supabase
+			.from("tipo_user")
+			.select("tipo_user")
+			.eq("id", userDetails.id_tipo_user)
+			.single();
+
+		if (tipoUserError || !tipoUserData || tipoUserData.tipo_user !== "moderador") {
+			router.push("/pag-inicial"); // Redirecionar para a página principal se não for moderador
+		}
+	};
+
+	verificarTipoUser();
+}, []);
 
   return (
     <>

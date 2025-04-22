@@ -6,7 +6,8 @@ import HeaderInicio from "../HeaderInicio";
 import React, { useState } from 'react';
 import { Upload, Search } from 'lucide-react';
 import supabase from "@/app/config/supabaseClient";
-
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 
 // Fonte Kanit
@@ -89,72 +90,128 @@ export default function SubmeterDocumento() {
 	// Função chamada quando o formulário é submetido
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-
-		// Verifica se o array está vazio (nenhum ficheiro foi selecionado) Verifica se o tipo é PDF, se está vazio ou não é .pdf exibe uma mensagem de erro
+	
 		if (!ficheiro) {
 			setErro("Nenhum ficheiro selecionado!");
-			return
+			return;
 		}
-
-		try {	
+	
+		try {
 			setUploading(true);
 			setErro("");
-
-			// Fazer o Upload para o Supabase Storage
+	
+			// Obter o utilizador atual
+			const { data: { user }, error: userError } = await supabase.auth.getUser();
+			if (userError || !user) throw new Error("Não foi possível obter o utilizador.");
+	
+			const user_id = user.id;
+	
+			// Buscar id_tipo_user do utilizador
+			const { data: userDetails, error: userDetailsError } = await supabase
+				.from("user_details")
+				.select("id_tipo_user, nome")
+				.eq("id_user", user_id)
+				.single();
+	
+			if (userDetailsError || !userDetails) throw new Error("Erro ao obter detalhes do utilizador.");
+	
+			// Buscar o tipo_user pelo id_tipo_user
+			const { data: tipoUserData, error: tipoUserError } = await supabase
+				.from("tipo_user")
+				.select("tipo_user")
+				.eq("id", userDetails.id_tipo_user)
+				.single();
+	
+			if (tipoUserError || !tipoUserData) throw new Error("Erro ao verificar o tipo de utilizador.");
+	
+			// Verificar se é aluno
+			if (tipoUserData.tipo_user !== "aluno") {
+				setErro("Apenas utilizadores do tipo 'aluno' podem submeter documentos.");
+				setUploading(false);
+				return;
+			}
+	
+			// Fazer upload para o Supabase Storage
 			const { data: storageData, error: storageError } = await supabase.storage
-			.from('documentos')
-			.upload(ficheiro.name, ficheiro, {
-				cacheControl: '3600',
-				upsert: false,
-				contentType: ficheiro.type,
-			});
-
+				.from("documentos")
+				.upload(ficheiro.name, ficheiro, {
+					cacheControl: "3600",
+					upsert: false,
+					contentType: ficheiro.type,
+				});
+	
 			if (storageError) throw storageError;
-
-			// Obter o URL público do ficheiro
-			const {data: {publicURL}} = supabase.storage
-			.from('documentos')
-			.getPublicUrl(storageData.path)
-
-			setPublicURL(publicURL)
-
-			// Obter informações do utilizador
-			const user_id = await getCurrentUserId();
-			const { data: userData, error: userDataError } = await supabase
-			.from('user_details')
-			.select('nome')
-			.eq('id_user', user_id)
-			.maybeSingle();
-
-			if (userDataError) throw userDataError;
-
-			// Preparar dados para inserir na BD
+	
+			const { data: { publicURL } } = supabase.storage
+				.from("documentos")
+				.getPublicUrl(storageData.path);
+	
+			setPublicURL(publicURL);
+	
+			// Inserir metadados na tabela user_documents
 			const sendDocumentData = {
 				user_id: user_id,
 				document_id: storageData.id,
 				created_at: new Date(),
 				name: ficheiro.name,
-				author: userData.nome,
+				author: userDetails.nome,
 				size: ficheiro.size,
 				estado: 1,
-			}
-
-			// Inserir os dados na BD
+			};
+	
 			const { error: dbError } = await supabase
-			.from('user_documents')
-			.insert([sendDocumentData]);
-
+				.from("user_documents")
+				.insert([sendDocumentData]);
+	
 			if (dbError) throw dbError;
-
-			// Se tudo funcionar emitir um alerta
-			alert("Ficheiro submetido com sucesso!")
-
+	
+			alert("Ficheiro submetido com sucesso!");
+	
 		} catch (error) {
 			setErro("Erro: " + error.message);
 		} finally {
-			setUploading(false)
+			setUploading(false);
 		}
 	};
+	
+	
+
+
+const router = useRouter();
+
+useEffect(() => {
+	const verificarTipoUser = async () => {
+		const { data: { user }, error } = await supabase.auth.getUser();
+		if (error || !user) {
+			router.push("/login"); // Ou redirecionar para login, se não autenticado
+			return;
+		}
+
+		const { data: userDetails, error: userDetailsError } = await supabase
+			.from("user_details")
+			.select("id_tipo_user")
+			.eq("id_user", user.id)
+			.single();
+
+		if (userDetailsError || !userDetails) {
+			router.push("/erro"); // Página genérica de erro
+			return;
+		}
+
+		const { data: tipoUserData, error: tipoUserError } = await supabase
+			.from("tipo_user")
+			.select("tipo_user")
+			.eq("id", userDetails.id_tipo_user)
+			.single();
+
+		if (tipoUserError || !tipoUserData || tipoUserData.tipo_user !== "aluno") {
+			router.push("/pag-inicial"); // Redirecionar para a página principal se não for aluno
+		}
+	};
+
+	verificarTipoUser();
+}, []);
+
 
 	return (
 		<>
