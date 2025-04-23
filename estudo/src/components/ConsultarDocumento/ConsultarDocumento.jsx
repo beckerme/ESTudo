@@ -438,14 +438,14 @@ export default function ConsultarDocumento() {
 
             <div className={`${kanit.className} w-full min-h-[calc(100vh-80px)] flex items-center`}>
                 <div className="container mx-auto">
-                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-20">
+                    <div className="grid grid-cols-1 lg:grid-cols-4">
                         {/* 📄 Coluna do documento PDF */}
                         <div className="bg-[#012B55] lg:col-span-3 rounded-xl shadow-lg overflow-hidden w-9/10">
                             <div className="p-6 md:p-10 w-3/4 flex mx-auto flex-col">
                                 <h1 className="text-white font-extrabold text-3xl md:text-5xl">{titulo}</h1>
                                 <p className="py-2 text-white text-xl md:text-2xl"><strong>Autor:</strong> {autor}</p>
 
-                                <div className="mt-2 bg-[#0369A9] rounded-lg flex items-center justify-center h-[50vh] md:h-[60vh]">
+                                <div className="mt-2 rounded-lg flex items-center justify-center h-[50vh] md:h-[60vh]">
                                     {isClient && pdfUrl ? (
                                         <PDFViewer url={pdfUrl} />
                                     ) : (
