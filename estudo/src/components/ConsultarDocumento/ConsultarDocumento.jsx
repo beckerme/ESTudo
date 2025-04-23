@@ -9,29 +9,38 @@ import { useSearchParams } from "next/navigation";
 import PDFViewer from "../PdfViewer";
 import { FaStar, FaRegStar } from "react-icons/fa";
 
-// Configuração da Fonte para o Projeto
+// 🔤 Configuração da Fonte para o Projeto
 const kanit = Kanit({
     subsets: ['latin'],
     weight: ["400", "700", "800"],
 });
 
 export default function ConsultarDocumento() {
-    // Estados para gerir o utilizador, comentários, erros e avaliações
-    const [comentario, setComentario] = useState("");
-    const [comentarios, setComentarios] = useState([]);
-    const [erro, setErro] = useState("");
-    const [isClient, setIsClient] = useState(false);
-    const [pdfUrl, setPdfUrl] = useState("");
-    const [titulo, setTitulo] = useState("Documento Sem Título");
-    const [autor, setAutor] = useState("Autor Desconhecido");
-    const [tipoUtilizador, setTipoUtilizador] = useState(null);
-    const [avaliacao, setAvaliacao] = useState(0); // Avaliação do usuário atual
-    const [avaliacaoHover, setAvaliacaoHover] = useState(0);
-    const [avaliacaoMedia, setAvaliacaoMedia] = useState(0); // Média de todas as avaliações
-    const [totalAvaliacoes, setTotalAvaliacoes] = useState(0); // Número total de avaliações
+    // ⚙️ Estados para gerir o utilizador, comentários, erros e avaliações
+        // Geral
+        const [erro, setErro] = useState("");                         // Erro
+        const [isClient, setIsClient] = useState(false);              // Verifica se o componente está no lado do cliente
+        const [tipoUtilizador, setTipoUtilizador] = useState(null);   // Tipo de utilizador (1-Admin,2-Moderador,3-Aluno,4-utilizador_nao_validado,5-user_inativo)
+        
+        // 📄 Documento
+        const [pdfUrl, setPdfUrl] = useState("");                       // URL do PDF      
+        const [titulo, setTitulo] = useState("Documento Sem Título");   // Título do documento
+        const [autor, setAutor] = useState("Autor Desconhecido");       // Autor do documento
+
+        // 💬 Comentários
+        const [comentario, setComentario] = useState("");               // Texto do comentário
+        const [comentarios, setComentarios] = useState([]);             // Lista de comentários
+        const [likes, setLikes] = useState({});                         // Likes e dislikes dos comentários
+        
+        // ⭐ Avaliações
+        const [avaliacao, setAvaliacao] = useState(0);                  // Avaliação do utilizador
+        const [avaliacaoHover, setAvaliacaoHover] = useState(0);        // Avaliação em hover
+        const [avaliacaoMedia, setAvaliacaoMedia] = useState(0);        // Avaliação média do documento
+        const [totalAvaliacoes, setTotalAvaliacoes] = useState(0);      // Total de avaliações do documento
 
     const searchParams = useSearchParams();
 
+    // 🔄 Efeito para incializar o cliente e obter os parâmetros da URL
     useEffect(() => {
         setIsClient(true);
         if (searchParams) {
@@ -45,13 +54,15 @@ export default function ConsultarDocumento() {
         }
     }, [searchParams]);
 
-    // Efeito para obter os dados do utilizador atual
+    // 🔄 Efeito para obter os dados do utilizador atual
     useEffect(() => {
         const fetchCurrentUser = async () => {
             try {
+                // 🔍 Obter os dados do utilizador
                 const { data: { user }, error } = await supabase.auth.getUser();
                 if (error) throw error;
 
+                // 🔍 Obter os detalhes do utilizador
                 if (user) {
                     const { data: userData, error: userError } = await supabase
                         .from('user_details')
@@ -74,10 +85,12 @@ export default function ConsultarDocumento() {
         fetchCurrentUser();
     }, [searchParams]);
 
-    // COMENTÁRIOS
+    // 💬 COMENTÁRIOS - Obter comentários existentes
     useEffect(() => {
         const fetchComentarios = async () => {
             try {
+
+                // 🔍 Obter o titulo do documento
                 const { data: document, error: docError } = await supabase
                     .from('user_documents')
                     .select('*')
@@ -85,6 +98,7 @@ export default function ConsultarDocumento() {
                     .maybeSingle();
                 if (docError) throw docError;
 
+                // 🔍 Obter os comentários do documento
                 const { data, error } = await supabase
                     .from('comment_user')
                     .select('*')
@@ -103,10 +117,10 @@ export default function ConsultarDocumento() {
         }
     }, [pdfUrl]);
 
-    // Função para buscar a avaliação média do documento
+    // 📈 Função para buscar a avaliação média do documento
     const fetchAvaliacaoMedia = async () => {
         try {
-            // Buscar o documento pelo título
+            // 🔍 Obter o documento pelo título
             const { data: document, error: docError } = await supabase
                 .from('user_documents')
                 .select('id')
@@ -116,7 +130,7 @@ export default function ConsultarDocumento() {
             if (docError) throw docError;
             if (!document) return;
 
-            // Buscar todas as avaliações para este documento
+            // 🔍 Obter todas as avaliações para este documento
             const { data: ratings, error: ratingsError } = await supabase
                 .from('ratings')
                 .select('rating')
@@ -124,7 +138,7 @@ export default function ConsultarDocumento() {
             
             if (ratingsError) throw ratingsError;
 
-            // Calcular a média
+            // 📊 Calcular a média
             if (ratings && ratings.length > 0) {
                 const soma = ratings.reduce((acc, curr) => acc + curr.rating, 0);
                 const media = soma / ratings.length;
@@ -139,13 +153,16 @@ export default function ConsultarDocumento() {
         }
     };
 
-    // Efeito para buscar a avaliação do usuário atual e a média
+    // 🔄 Efeito para buscar a avaliação do usuário atual e a média
     useEffect(() => {
         const fetchAvaliacoes = async () => {
             try {
+
+                // 🔍 Obter os dados do utilizador
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) return;
 
+                // 🔍 Obter o documento pelo título
                 const { data: document } = await supabase
                     .from('user_documents')
                     .select('id')
@@ -154,7 +171,7 @@ export default function ConsultarDocumento() {
                 
                 if (!document) return;
 
-                // Buscar avaliação do usuário atual
+                // 🔍 Obter avaliação do usuário atual
                 const { data: avaliacaoData } = await supabase
                     .from('ratings')
                     .select('rating')
@@ -166,7 +183,7 @@ export default function ConsultarDocumento() {
                     setAvaliacao(avaliacaoData.rating);
                 }
 
-                // Buscar avaliação média
+                // 🔍 Obter a avaliação média
                 await fetchAvaliacaoMedia();
             } catch (error) {
                 console.error("Erro ao buscar avaliações:", error.message);
@@ -176,20 +193,24 @@ export default function ConsultarDocumento() {
         if (pdfUrl) fetchAvaliacoes();
     }, [pdfUrl]);
 
-    // Adicionar um novo comentário
+    // ➕ Adicionar um novo comentário
     const addComment = async (e) => {
         e.preventDefault();
 
+        // 🔍 Verificar se o comentário está vazio
         if (!comentario.trim()) {
             setErro("Por favor, escreva um comentário");
             return;
         }
 
         try {
+
+            // 🔍 Obter os dados do utilizador
             const { data: { user }, error: authError } = await supabase.auth.getUser();
             if (authError) throw authError;
             if (!user?.id) throw new Error("Utilizador não autenticado");
 
+            // 🔍 Obter os detalhes (nome e tipo) do utilizador
             const { data: userData, error: userDataError } = await supabase
                 .from('user_details')
                 .select('nome, id_tipo_user')
@@ -198,6 +219,7 @@ export default function ConsultarDocumento() {
 
             if (userDataError) throw userDataError;
 
+            // 🔍 Obter o ID do documento pelo título
             const { data: document, error: docError } = await supabase
                 .from('user_documents')
                 .select('id')
@@ -205,6 +227,7 @@ export default function ConsultarDocumento() {
                 .maybeSingle();
             if (docError) throw docError;
 
+            // 📝 Criar o objeto de comentário
             const sendComment = {
                 created_at: new Date(),
                 text: comentario,
@@ -213,6 +236,7 @@ export default function ConsultarDocumento() {
                 document_id: document.id,
             };
 
+            // ➕ Inserir o novo comentário na tabela
             const { data: novoComentario, error } = await supabase
                 .from('comment_user')
                 .insert([sendComment])
@@ -221,6 +245,7 @@ export default function ConsultarDocumento() {
 
             if (error) throw error;
 
+            // 🔄 Atualizar o estado com o novo comentário
             setComentarios([novoComentario, ...comentarios]);
             setComentario("");
             setErro("");
@@ -230,12 +255,15 @@ export default function ConsultarDocumento() {
         }
     };
 
-    // Remover comentário
+    // 🗑️ Remover comentário (apenas para moderadores)
     const removeComment = async (id) => {
         try {
+
+            // 🔍 Obter os dados do utilizador
             const { data: { user }, error: authError } = await supabase.auth.getUser();
             if (authError) throw authError;
     
+            // 🔍 Obter o tipo de utilizador
             const { data: userDetails, error: detailsError } = await supabase
                 .from('user_details')
                 .select('id_tipo_user')
@@ -244,11 +272,13 @@ export default function ConsultarDocumento() {
     
             if (detailsError) throw detailsError;
     
+            // 🔍 Verificar se o utilizador é moderador
             if (userDetails.id_tipo_user !== 2) {
                 setErro("Apenas moderadores podem remover comentários");
                 return;
             }
     
+            // 🗑️ Eliminar o comentário
             const { error: deleteError } = await supabase
                 .from('comment_user')
                 .delete()
@@ -256,6 +286,7 @@ export default function ConsultarDocumento() {
     
             if (deleteError) throw deleteError;
     
+            // 🔄 Atualizar o estado para remover o comentário
             setComentarios(comentarios.filter(comment => comment.id !== id));
             setErro("");
     
@@ -264,12 +295,15 @@ export default function ConsultarDocumento() {
         }
     };
 
-    // AVALIAÇÃO
+    // ⭐ AVALIAÇÃO - Lidar com avaliação do utilizador
     const handleRating = async (rating) => {
         try {
+
+            // 🔍 Obter os detalhes do utilizador
             const { data: { user }, error: authError } = await supabase.auth.getUser();
             if (authError) throw authError;
 
+            // 🔍 Obter o ID do documento pelo título
             const { data: document, error: docError } = await supabase
                 .from('user_documents')
                 .select('id')
@@ -277,8 +311,10 @@ export default function ConsultarDocumento() {
                 .maybeSingle();
             if (docError) throw docError;
 
+            // 🔄 Atualizar a avaliação do utilizador
             setAvaliacao(rating);
 
+            // 📝 Criar o objeto de avaliação
             const sendRating = {
                 user_id: user.id,
                 doc_id: document.id,
@@ -286,7 +322,7 @@ export default function ConsultarDocumento() {
                 created_at: new Date(),
             }
 
-            // Exclui avaliações anteriores do usuário para este documento
+            // 🗑️ Exclui avaliações anteriores do usuário para este documento
             const { error: deleteError } = await supabase
                 .from('ratings')
                 .delete()
@@ -295,7 +331,7 @@ export default function ConsultarDocumento() {
 
             if (deleteError) throw deleteError;
 
-            // Insere a nova avaliação
+            // ➕ Insere a nova avaliação
             const { error } = await supabase
                 .from('ratings')
                 .insert([sendRating]);
@@ -303,15 +339,98 @@ export default function ConsultarDocumento() {
             if (error) {
                 setErro("Erro ao submeter avaliação: " + error.message);
             } else {
+
+                // 🔄 Atualiza o estado com a nova avaliação
                 setAvaliacao(rating);
                 setErro("");
-                // Atualiza a média após nova avaliação
+                // 🔄 Atualiza a média após nova avaliação
                 await fetchAvaliacaoMedia();
             }
         } catch (error) {
             setErro("Erro ao avaliar: " + error.message);
         }
     }
+
+    // 👍👎 LIKE / DISLIKE - Obter likes existentes
+    const fetchLikes = async () => {
+        try {
+
+            // 🔍 Obter os dados de utilizador e do comentário
+            const { data: { user } } = await supabase.auth.getUser();
+            const { data: likesData, error } = await supabase
+                .from('comment_likes')
+                .select('*');
+    
+            if (error) throw error;
+            
+            // 🔄 Criar um mapa para armazenar os likes e dislikes
+            const map = {};
+    
+            // 🔄 Iterar sobre os dados de likes
+            likesData.forEach((like) => {
+                if (!map[like.comment_id]) {
+                    map[like.comment_id] = { likes: 0, dislikes: 0, userLike: null };
+                }
+    
+                if (like.is_like) {
+                    map[like.comment_id].likes += 1;
+                } else {
+                    map[like.comment_id].dislikes += 1;
+                }
+    
+                if (user && like.user_id === user.id) {
+                    map[like.comment_id].userLike = like.is_like;
+                }
+            });
+    
+            // 🔄 Atualizar o estado com os likes
+            setLikes(map);
+        } catch (err) {
+            setErro("Erro ao buscar likes:", err.message);
+        }
+    };
+
+    useEffect(() => {
+        if (pdfUrl) fetchLikes();
+    }, [comentarios]);
+
+    // 🔄 Alternar like/dislike
+    const toggleLike = async (commentId, isLike) => {
+        try {
+
+            // 🔍 Obter os dados do utilizador
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error("Usuário não autenticado");
+    
+            // 🔍 Obter os dados de likes
+            const existing = likes[commentId]?.userLike;
+    
+            // 🔄 Se já deu like/dislike igual, remove (toggle)
+            if (existing === isLike) {
+                await supabase
+                    .from('comment_likes')
+                    .delete()
+                    .eq('user_id', user.id)
+                    .eq('comment_id', commentId);
+            } else {
+                // 🔄 Upsert (remove se existir, insere novamente)
+                await supabase
+                    .from('comment_likes')
+                    .upsert({
+                        user_id: user.id,
+                        comment_id: commentId,
+                        is_like: isLike,
+                        created_at: new Date()
+                    }, { onConflict: ['user_id', 'comment_id'] });
+            }
+    
+            // 🔄 Atualiza os dados
+            await fetchLikes();
+        } catch (error) {
+            console.error("Erro completo ao dar like/dislike:", error); // <-- isso ajuda muito!
+            setErro("Erro ao dar like/dislike: " + error.message);
+        }        
+    };
 
     return (
         <>
@@ -320,7 +439,7 @@ export default function ConsultarDocumento() {
             <div className={`${kanit.className} w-full min-h-[calc(100vh-80px)] flex items-center`}>
                 <div className="container mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-20">
-                        {/* Coluna do documento PDF */}
+                        {/* 📄 Coluna do documento PDF */}
                         <div className="bg-[#012B55] lg:col-span-3 rounded-xl shadow-lg overflow-hidden w-9/10">
                             <div className="p-6 md:p-10 w-3/4 flex mx-auto flex-col">
                                 <h1 className="text-white font-extrabold text-3xl md:text-5xl">{titulo}</h1>
@@ -336,9 +455,9 @@ export default function ConsultarDocumento() {
                             </div>
                         </div>
 
-                        {/* Coluna dos comentários e avaliações */}
+                        {/* 💬 Coluna dos comentários e avaliações */}
                         <div className="bg-[#012B55] rounded-xl shadow-lg overflow-hidden flex flex-col px-5">
-                            {/* Seção de avaliação média */}
+                            {/* 📊 Secção de avaliação média */}
                             <div className="py-5 text-center border-b border-gray-600">
                                 <div className="flex flex-col items-center">
                                     <span className="text-white text-2xl font-bold mb-2">
@@ -378,7 +497,7 @@ export default function ConsultarDocumento() {
                                 </div>
                             </div>
 
-                            {/* Seção de avaliação do usuário */}
+                            {/* ⭐ Secção de avaliação do usuário */}
                             <div className="py-5 text-center border-b border-gray-600">
                                 <div className="flex flex-col items-center">
                                     <span className="text-white text-2xl font-bold mb-2">
@@ -422,7 +541,7 @@ export default function ConsultarDocumento() {
                                 </div>
                             </div>
 
-                            {/* Seção de comentários */}
+                            {/* 💬 Secção de comentários */}
                             <div className="flex flex-col flex-grow">
                                 <div className="flex-grow max-h-[40vh] overflow-y-auto px-4 py-5">
                                     {comentarios.length > 0 ? (
@@ -445,13 +564,32 @@ export default function ConsultarDocumento() {
                                                 </div>
                                                 <div className="mt-2 bg-[#0369A9] rounded-3xl p-4 text-white">
                                                     <p className="text-lg">{comment.text}</p>
-                                                    <div className="flex justify-end mt-2">
-                                                        <button className="mr-3">
-                                                            <Image src="/thumbs_down.png" alt="dislike" width={30} height={30} className="w-6 h-6" />
+                                                    <div className="flex justify-end mt-2 space-x-4">
+                                                        
+                                                        <button
+                                                        onClick={() => toggleLike(comment.id, false)}
+                                                        className={`
+                                                            flex items-center space-x-1
+                                                            transition-transform hover:scale-110
+                                                            ${likes[comment.id]?.userLike === false ? 'brightness-125' : 'opacity-60'}
+                                                        `}
+                                                        >
+                                                        <Image src="/thumbs_down.png" alt="dislike" width={20} height={20} />
+                                                        <span className="text-white text-xs">{likes[comment.id]?.dislikes || 0}</span>
                                                         </button>
-                                                        <button>
-                                                            <Image src="/thumbs_up.png" alt="like" width={30} height={30} className="w-6 h-6" />
+
+                                                        <button
+                                                        onClick={() => toggleLike(comment.id, true)}
+                                                        className={`
+                                                            flex items-center space-x-1
+                                                            transition-transform hover:scale-110
+                                                            ${likes[comment.id]?.userLike === true ? 'brightness-125' : 'opacity-60'}
+                                                        `}
+                                                        >
+                                                        <Image src="/thumbs_up.png" alt="like" width={20} height={20} />
+                                                        <span className="text-white text-xs">{likes[comment.id]?.likes || 0}</span>
                                                         </button>
+
                                                     </div>
                                                 </div>
                                                 <div className="text-white"><TempoRelativo data={comment.created_at} /></div>
@@ -462,7 +600,7 @@ export default function ConsultarDocumento() {
                                     )}
                                 </div>
 
-                                {/* Formulário para adicionar novo comentário */}
+                                {/* ✏️ Formulário para adicionar novo comentário */}
                                 <div className="mb-5 px-2 py-5 mt-auto">
                                     <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
                                         <div className="flex-grow bg-white text-black rounded-full py-2 px-4 shadow-md">
