@@ -19,46 +19,56 @@ export default function Notificacao({ isOpen, setIsOpen }) {
     }
   }, [isOpen]);
 
-  // Função para carregar as notificações da base de dados
-  const carregarNotificacoes = async () => {
-    setLoading(true);
+  // Função assíncrona para carregar as notificações do utilizador logado
+const carregarNotificacoes = async () => {
+  // Define o estado de "loading" como true para indicar que os dados estão a ser carregados
+  setLoading(true);
 
-    // Pegar o usuário logado
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+  // Tenta obter o utilizador atualmente autenticado no Supabase
+  const {
+    data: { user }, // Extrai o objeto "user" de dentro do "data"
+    error: userError, // Se houver erro na autenticação, será armazenado aqui
+  } = await supabase.auth.getUser(); // Faz a chamada à autenticação
 
-    // Se não houver um utilizador autenticado, não carregar notificações
-    if (userError || !user) {
-      console.error("Erro ao obter utilizador:", userError?.message);
-      setLoading(false);
-      return;
-    }
+  // Verifica se houve erro ou se o utilizador não foi encontrado
+  if (userError || !user) {
+    console.error("Erro ao obter utilizador:", userError?.message); // Mostra o erro na consola
+    setLoading(false); // Para o estado de loading
+    return; // Interrompe a execução da função
+  }
 
-    // Buscar as notificações do utilizador
-    const { data, error } = await supabase
-      .from("user_notifications")
-      .select("*")
-      .eq("id_user", user.id) // Garantir que estamos a buscar as notificações do utilizador logado
-      .in("id_estado", [ESTADOS.nao_lida, ESTADOS.lida]) // Vai buscar apenas notificações lidas ou não lidas
-      .order("id", { ascending: false }); // Ordenar por ID (mais recentes primeiro)
+  // Faz uma consulta à tabela "user_notifications" no Supabase
+  const { data, error } = await supabase
+    .from("user_notifications") // Define a tabela a consultar
+    .select("*") // Seleciona todos os campos
+    .eq("id_user", user.id) // Filtra apenas as notificações do utilizador autenticado
+    .in("id_estado", [ESTADOS.nao_lida, ESTADOS.lida]) // Filtra apenas notificações com estado "não lida" ou "lida"
+    .order("id_notification", { ascending: false }); // Ordena os resultados do mais recente para o mais antigo
 
-    setLoading(false);
-  };
+  // Verifica se houve erro na consulta
+  if (error) {
+    console.error("Erro ao carregar notificações:", error.message); // Mostra o erro na consola
+  } else {
+    setNotificacoes(data); // Atualiza o estado com as notificações obtidas
+  }
+
+  // Termina o estado de loading
+  setLoading(false);
+};
+
 
   // Função para eliminar uma notificação
   const eliminarNotificacao = async (id) => {
     const { error } = await supabase
       .from("user_notifications")
       .update({ id_estado: ESTADOS.eliminada }) // Marcar como eliminada
-      .eq("id", id);
+      .eq("id_notification", id);
 
     if (error) {
       console.error("Erro ao eliminar notificação:", error.message);
     } else {
       // Atualizar as notificações no estado, removendo a notificação eliminada
-      setNotificacoes((prev) => prev.filter((n) => n.id !== id));
+      setNotificacoes((prev) => prev.filter((n) => n.id_notification !== id));
     }
   };
 
@@ -81,11 +91,11 @@ export default function Notificacao({ isOpen, setIsOpen }) {
         ) : notificacoes.length > 0 ? (
           notificacoes.map((notif) => (
             <div
-              key={notif.id}
+              key={notif.id_notification}
               className="bg-gray-100 rounded-lg p-3 shadow-sm hover:bg-gray-200 transition flex justify-between items-start"
             >
               <span>{notif.mensagem}</span>
-              <button onClick={() => eliminarNotificacao(notif.id)} className="text-red-500">
+              <button onClick={() => eliminarNotificacao(notif.id_notification)} className="text-red-500">
                 <Trash2 size={16} />
               </button>
             </div>
