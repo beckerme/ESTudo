@@ -68,7 +68,7 @@ const carregarNotificacoes = async () => {
       console.error("Erro ao eliminar notificação:", error.message);
     } else {
       // Atualizar as notificações no estado, removendo a notificação eliminada
-      setNotificacoes((prev) => prev.filter((n) => n.id !== id));
+      setNotificacoes((prev) => prev.filter((n) => n.id_notification !== id));
     }
   };
 
