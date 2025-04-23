@@ -28,7 +28,7 @@ export default function ConsultarDocumento() {
     const [autor, setAutor] = useState("Autor Desconhecido");       // Autor do documento
     const [tipoUtilizador, setTipoUtilizador] = useState(null);     // Tipo de utilizador (ex: 1-admin, 2-moderador, 3-aluno, 4-user_nao_validado, 5-user_inativo)
     const [avaliacao, setAvaliacao] = useState(0);                  // Avaliação do documento
-    const [avaliacaoHover, setAvaliacaoHover] = useState(0);                         // Avaliação em hover
+    const [avaliacaoHover, setAvaliacaoHover] = useState(0);        // Avaliação em hover
 
     // Obter os parâmetros da URL
     const searchParams = useSearchParams();
@@ -63,7 +63,8 @@ export default function ConsultarDocumento() {
             setAutor(author || "Autor Desconhecido");
         }
 
-        // Obter os dados do utilizador
+        
+        // DADOS DO UTILIZADOR
         const fetchCurrentUser = async () => {
             try {
 
@@ -95,17 +96,26 @@ export default function ConsultarDocumento() {
         fetchCurrentUser();
     }, [searchParams]);
 
-    // Efeito para obter os comentários do documento
+    
+    // COMENTÁRIOS
     useEffect(() => {
         const fetchComentarios = async () => {
             try {
 
-                // Obtém todos os comentários da base de dados, ordenados por data
+                // Obter o ID do documento baseado no URL
+                const { data: document, error: docError } = await supabase
+                    .from('user_documents')
+                    .select('*')
+                    .eq('name', titulo)
+                    .maybeSingle();
+                if (docError) throw docError;
+
+                // Obter os comentários associados ao documento em questão
                 const { data, error } = await supabase
                     .from('comment_user')
                     .select('*')
-                    .order('created_at', { ascending: true });
-    
+                    .eq('document_id', document.id)
+                    .order('created_at', { ascending: false });
                 if (error) throw error;
     
                 // Atualiza o estado dos comentários com os dados obtidos
@@ -132,9 +142,8 @@ export default function ConsultarDocumento() {
         }
 
         try {
-
             // Obter o utilizador autenticado
-            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            const { data: user, error: authError } = await supabase.auth.getUser();
             if (authError) throw authError;
 
             // Obtém os detalhes do utilizador (nome e tipo de utilizador)
@@ -146,12 +155,21 @@ export default function ConsultarDocumento() {
 
             if (userDataError) throw userDataError;
 
+            // 🔍 Buscar o ID do documento atual com base no PDF
+            const { data: document, error: docError } = await supabase
+                .from('user_documents')
+                .select('id')
+                .eq('name', titulo)
+                .maybeSingle();
+            if (docError) throw docError;
+
             // Cria o objeto do comentário a ser enviado
             const sendComment = {
-                created_at: new Date(),     // Data atual
-                text: comentario,           // Texto do comentário
-                user_id: user.id,           // ID do utilizador
-                author: userData.nome,      // Nome do autor
+                created_at: new Date(),         // Data atual
+                text: comentario,               // Texto do comentário
+                user_id: user.id,               // ID do utilizador
+                author: userData.nome,          // Nome do autor
+                document_id: document.id,       // ID do documento
             };
 
             // Insere o novo comentário na base de dados
@@ -213,6 +231,88 @@ export default function ConsultarDocumento() {
         }
     };
 
+    // AVALIAÇÃO
+    const handleRating = async (rating) => {
+
+        // 🔍 Obter o utilizador atual
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError) throw authError;
+
+        // 🔍 Buscar o ID do documento atual com base no PDF
+        const { data: document, error: docError } = await supabase
+            .from('user_documents')
+            .select('id')
+            .eq('name', titulo)
+            .maybeSingle();
+        if (docError) throw docError;
+
+        // 🔁 Atualiza a função localmente
+        setAvaliacao(rating);
+
+        // 💾 Criar o objeto da avalição a ser enviado para o supabase
+        const sendRating = {
+            user_id: user.id,
+            doc_id: document.id,
+            rating: rating,
+            created_at: new Date(),
+        }
+
+        // ⚠️ Exclui todas as avaliações anteriores do usuário para o documento
+        const { error: deleteError } = await supabase
+            .from('ratings')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('doc_id', document.id);
+
+        if (deleteError) throw deleteError;
+
+        // 💾 Insere o novo rating
+        const {error} = await supabase
+            .from('ratings')
+            .insert([sendRating]);
+
+        if (error) {
+            setErro("Erro ao submeter avaliação: " + error.message);
+        }
+        else {
+            setAvaliacao(rating);
+            setErro("");
+        }
+    }
+
+    // Efeito para carregar a avaliação
+    useEffect(() => {
+        const fetchAvaliacao = async () => {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+    
+                const { data: document } = await supabase
+                    .from('user_documents')
+                    .select('id')
+                    .eq('name', titulo)
+                    .maybeSingle();
+    
+                if (!document) return;
+    
+                const { data: avaliacaoData, error } = await supabase
+                    .from('ratings')
+                    .select('rating')
+                    .eq('user_id', user.id)
+                    .eq('doc_id', document.id)
+                    .single();
+    
+                if (avaliacaoData) {
+                    setAvaliacao(avaliacaoData.rating);
+                }
+            } catch (error) {
+                console.error("Erro ao buscar avaliação:", error.message);
+            }
+        };
+    
+        if (pdfUrl) fetchAvaliacao();
+    }, [pdfUrl]);
+    
+
     return (
         <>
             {/* Barra Topo */}
@@ -265,7 +365,7 @@ export default function ConsultarDocumento() {
                                                     type="radio"
                                                     name="rating"
                                                     value={valorAvaliacao}
-                                                    onClick={() => setAvaliacao(valorAvaliacao)}
+                                                    onChange={() => handleRating(valorAvaliacao)}
                                                     className="hidden"
                                                 />
                                                 <span
