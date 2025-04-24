@@ -48,7 +48,7 @@ const PDFViewer = ({ url }) => {
         ref={viewerRef}
         style={{ 
           width: "100%", 
-          height: "600px", 
+          height: "60vh", 
           margin: "0 auto", 
           overflow: "auto" 
         }} 
