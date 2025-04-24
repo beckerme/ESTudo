@@ -438,11 +438,11 @@ export default function ConsultarDocumento() {
 
             <div className={`${kanit.className} w-full min-h-[calc(100vh-80px)] flex items-center`}>
                 <div className="container mx-auto">
-                    <div className="grid grid-cols-1 lg:grid-cols-4 px-10 py-5 md:h-[90vh] 2xl:h-[85vh]">
+                    <div className="grid grid-cols-1 lg:grid-cols-4 px-10 py-5 md:h-[85vh] xl:h-[90vh] 2xl:h-[85vh]">
                         {/* 📄 Coluna do documento PDF */}
-                        <div className="bg-[#012B55] lg:col-span-3 rounded-xl shadow-lg overflow-hidden w-9/10">
+                        <div className="bg-[#012B55] lg:col-span-3 rounded-xl shadow-lg overflow-hidden md:w-9/10">
                             <div className="px-15 py-10 flex mx-auto flex-col">
-                                <h1 className="text-white font-extrabold text-3xl md:text-5xl 2xl:text-6xl">{titulo}</h1>
+                                <h1 className="text-white font-extrabold text-3xl md:text-4xl xl:text-5xl 2xl:text-6xl">{titulo}</h1>
                                 <p className="py-2 text-white text-xl md:text-2xl 2xl:text-3xl"><strong>Autor:</strong> {autor}</p>
 
                                 <div className="mt-2 rounded-lg flex items-center justify-center h-[50vh] md:h-[60vh]">
@@ -543,10 +543,10 @@ export default function ConsultarDocumento() {
 
                             {/* 💬 Secção de comentários */}
                             <div className="flex flex-col flex-grow">
-                                <div className="flex-grow max-h-[40vh] overflow-y-auto px-4 py-5">
+                                <div className="flex-grow max-h-[40vh] md:max-h-[30vh] overflow-y-auto px-4 py-5">
                                     {comentarios.length > 0 ? (
                                         comentarios.map((comment, index) => (
-                                            <div key={index} className="mb-10 transition-all duration-300 group">
+                                            <div key={index} className="2xl:mb-10 xl:mb-6 md:mb-4 transition-all duration-300 group">
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center">
                                                         <Image src="/user.png" width={30} height={30} alt="foto de perfil" className="w-8 h-8" />
@@ -601,7 +601,7 @@ export default function ConsultarDocumento() {
                                 </div>
 
                                 {/* ✏️ Formulário para adicionar novo comentário */}
-                                <div className="mb-5 px-2 py-5 mt-auto">
+                                <div className="mb-5 px-2 py-2 mt-auto">
                                     <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
                                         <div className="flex-grow bg-white text-black rounded-full py-2 px-4 shadow-md">
                                             <form onSubmit={addComment} className="w-full">
