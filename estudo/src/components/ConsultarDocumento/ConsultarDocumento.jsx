@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import HeaderInicio from "../HeaderInicio";
+import HeaderInicio from "../HeaderInicioAluno";
 import { Kanit } from "next/font/google";
 import React, { useEffect, useState } from 'react';
 import supabase from "@/app/config/supabaseClient";

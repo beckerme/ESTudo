@@ -64,6 +64,24 @@ export default function LoginForm() {
         return;
       }
 
+       // Verifica se o tipo de usuário é 1
+      if (userDetails.id_tipo_user === 1) {
+        router.push("/pag-inicial-admin");
+        return;
+      }
+
+      // Verifica se o tipo de usuário é 2
+      if (userDetails.id_tipo_user === 2) {
+        router.push("/pag-inicial-mod");
+        return;
+      }
+
+      // Verifica se o tipo de usuário é 3
+      if (userDetails.id_tipo_user === 3) {
+        router.push("/pag-inicial-aluno");
+        return;
+      }
+
       router.push("/pag-inicial");
       
     } catch(err) {

@@ -16,9 +16,8 @@ export default function Header() {
         <div className="flex items-center justify-center xl:py-2 py-4 mt-3">
             <div className="flex items-center space-x-4">
         
-                {/* Logo */}
-                <Image src="/logo.png" width={80} height={80} alt="ESTudo Logo" />
-
+                {/* Logo */}         
+                  <Image src="/logo.png" width={80} height={80} alt="ESTudo Logo" />
                 {/* Title and Subtitle */}
                 <div>
                     <h1 className="lg:text-7xl text-5xl">ESTudo</h1>

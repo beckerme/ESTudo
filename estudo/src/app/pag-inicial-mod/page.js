@@ -1,12 +1,12 @@
 "use client";
 import ListaDocumentos from "@/components/ListaDocumentos";
-import Header from "../../components/HeaderInicio";
+import HeaderInicioMod from "../../components/HeaderInicioMod";
 import BarraPesquisa from "../../components/BarraPesquisa";
 
 function Page() {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <Header />
+      <HeaderInicioMod />
       
       <div className="flex flex-1 flex-col items-center justify-center">
         <div className="text-center">

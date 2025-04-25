@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Header from "../HeaderInicio";
+import Header from "../HeaderInicioAluno";
 import { Search, CheckCircle, XCircle } from "lucide-react";
 import { Kanit } from "next/font/google";
 import supabase from "@/app/config/supabaseClient";
@@ -90,44 +90,7 @@ export default function ValidarRegisto() {
   };
 
 
-  
 
-
-
-const router = useRouter();
-
-useEffect(() => {
-	const verificarTipoUser = async () => {
-		const { data: { user }, error } = await supabase.auth.getUser();
-		if (error || !user) {
-			router.push("/login"); // Ou redirecionar para login, se não autenticado
-			return;
-		}
-
-		const { data: userDetails, error: userDetailsError } = await supabase
-			.from("user_details")
-			.select("id_tipo_user")
-			.eq("id_user", user.id)
-			.single();
-
-		if (userDetailsError || !userDetails) {
-			router.push("/erro"); // Página genérica de erro
-			return;
-		}
-
-		const { data: tipoUserData, error: tipoUserError } = await supabase
-			.from("tipo_user")
-			.select("tipo_user")
-			.eq("id", userDetails.id_tipo_user)
-			.single();
-
-		if (tipoUserError || !tipoUserData || tipoUserData.tipo_user !== "moderador") {
-			router.push("/pag-inicial"); // Redirecionar para a página principal se não for moderador
-		}
-	};
-
-	verificarTipoUser();
-}, []);
 
   return (
     <>
