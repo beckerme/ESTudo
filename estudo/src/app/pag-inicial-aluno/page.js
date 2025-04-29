@@ -1,6 +1,6 @@
 "use client";
 import ListaDocumentos from "@/components/ListaDocumentos";
-import Header from "../../components/HeaderInicioAluno";
+import HeaderInicioAluno from "../../components/HeaderInicioAluno";
 import BarraPesquisa from "../../components/BarraPesquisa";
 
 function Page() {
