@@ -43,7 +43,8 @@ const carregarNotificacoes = async () => {
     .select("*") // Seleciona todos os campos
     .eq("id_user", user.id) // Filtra apenas as notificações do utilizador autenticado
     .in("id_estado", [ESTADOS.nao_lida, ESTADOS.lida]) // Filtra apenas notificações com estado "não lida" ou "lida"
-    .order("id_notification", { ascending: false }); // Ordena os resultados do mais recente para o mais antigo
+    .order("created_at", { ascending: false }) // Ordena os resultados do mais recente para o mais antigo
+    .limit(30); // Limita o número de resultados a 10
 
   // Verifica se houve erro na consulta
   if (error) {
