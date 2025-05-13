@@ -57,9 +57,9 @@ export default function HeaderInicio() {
           <Image src="/user.png" width={100} height={100} alt="foto do utilizador" className="rounded-full mb-6" />
           <h2 className="text-xl font-bold mb-6">Menu do Perfil</h2>
           <ul className="space-y-4 text-center">
-            <li><a href="#" className="hover:underline">Meu Perfil</a></li>
+            <li><a href="meu-perfil" className="hover:underline">Meu Perfil</a></li>
             <li><a href="validar-registo" className="hover:underline">Registos</a></li>
-            <li><a href="#" className="hover:underline">Definições</a></li>
+            <li><a href="definicoes" className="hover:underline">Definições</a></li>
             <li><a href="login" className="hover:underline">Sair</a></li>
             
           </ul>
