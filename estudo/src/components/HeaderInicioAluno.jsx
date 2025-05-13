@@ -18,7 +18,7 @@ export default function HeaderInicio() {
 
           {/* Logo Central */}
           <div className="w-12 h-12">
-            <a href="pag-inicial">
+            <a href="pag-inicial-aluno">
               <Image src="/logo.png" width={80} height={80} alt="logotipo aplicação" />
             </a>
           </div>
