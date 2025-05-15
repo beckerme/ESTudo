@@ -32,7 +32,7 @@ export default function ValidarRegisto() {
         setUsers(data);
       }
     };
-
+    
     const fetchCursos = async () => {
       const { data, error } = await supabase
         .from("curso")
