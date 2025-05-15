@@ -164,6 +164,70 @@ export default function SubmeterDocumento() {
 				.insert([sendDocumentData]);
 	
 			if (dbError) throw dbError;
+
+            // --- INSERIR NOTIFICAÇÃO ---
+            const notificationMessage = `O documento "${ficheiro.name}" foi submetido com sucesso.`;
+
+			// Função para buscar o ID do tipo de notificação pela descrição
+    		const getNotificationTypeId = async (descricao) => {
+        		const { data, error } = await supabase
+            		.from('notification_type') // Nome da sua tabela de tipos de notificação
+            		.select('id_tipo_notificacao')
+            		.eq('descricao', descricao)
+            		.single();
+
+				if (error) {
+					console.error(`Erro ao buscar o ID do tipo de notificação para "${descricao}":`, error);
+					throw new Error(`Não foi possível encontrar o tipo de notificação para "${descricao}".`);
+				}
+
+				if (!data) {
+					throw new Error(`Tipo de notificação "${descricao}" não encontrado.`);
+				}
+
+				return data.id_tipo_notificacao;
+			};
+
+			// Função para buscar o ID do estado da notificação pela descrição
+			const getNotificationStateId = async (estado) => {
+				const { data, error } = await supabase
+					.from('notification_state')
+					.select('id_estado')
+					.eq('estado', estado)
+					.single();
+
+				if (error) {
+					console.error(`Erro ao buscar o ID do estado da notificação para "${estado}":`, error);
+					throw new Error(`Não foi possível encontrar o estado de notificação para "${estado}".`);
+				}
+
+				if (!data) {
+					throw new Error(`Estado de notificação "${estado}" não encontrado.`);
+				}
+
+				return data.id_estado;
+			};
+
+
+			const tipoNotificacaoId = await getNotificationTypeId('doc_submetido'); // Buscar o UUID para 'doc_submetido'
+            const estadoNotificacaoId = await getNotificationStateId('nao_lida'); // Buscar o ID do estado da notificação dinamicamente
+
+            const notificationData = {
+                id_user: user_id,
+                created_at: new Date().toISOString(),
+                id_tipo_notification: tipoNotificacaoId, 
+                id_estado: estadoNotificacaoId, // **IMPORTANT**: Replace with the actual UUID for the initial state (e.g., unread) from your estado table
+                mensagem: notificationMessage,
+            };
+
+            const { error: notificationError } = await supabase
+                .from("user_notifications") // **IMPORTANT**: Replace with your actual notifications table name if different
+                .insert([notificationData]);
+
+            if (notificationError) {
+                console.error("Erro ao criar notificação:", notificationError);
+            }
+            // --- FIM INSERIR NOTIFICAÇÃO ---
 	
 			alert("Ficheiro submetido com sucesso!");
 	
