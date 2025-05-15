@@ -61,7 +61,7 @@ export default function HeaderInicio() {
           <ul className="space-y-4 text-center">
             <li><a href="meu-perfil" className="hover:underline">Meu Perfil</a></li>
             <li><a href="submeter-doc" className="hover:underline">Submeter Documentos</a></li>
-            <li><a href="#" className="hover:underline">Definições</a></li>
+            <li><a href="mensagem-erro" className="hover:underline">Definições</a></li>
             <li><a href="login" className="hover:underline">Sair</a></li>
             
           </ul>

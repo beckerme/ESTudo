@@ -7,16 +7,14 @@ import ListaDocumentos from "@/components/ListaDocumentos";
 import BarraPesquisa from "@/components/BarraPesquisa";
 
 export default function PagInicial() {
-  const [tipoUsuario, setTipoUsuario] = useState("");
+  const [tipoUsuario, setTipoUsuario] = useState(null);
 
   useEffect(() => {
-    const tipo = localStorage.getItem("tipoUsuario");
-    setTipoUsuario(tipo);
+    if (typeof window !== "undefined") {
+      const tipo = localStorage.getItem("tipoUsuario");
+      setTipoUsuario(tipo);
+    }
   }, []);
-
-  if (!tipoUsuario) {
-    return <div>Carregando...</div>; // ou redireciona para login
-  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">

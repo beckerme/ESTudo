@@ -58,7 +58,7 @@ export default function HeaderInicio() {
           <h2 className="text-xl font-bold mb-6">Menu do Perfil</h2>
           <ul className="space-y-4 text-center">
             <li><a href="#" className="hover:underline">Meu Perfil</a></li>
-            <li><a href="validar-documento" className="hover:underline">Apontamentos</a></li>
+            <li><a href="validar-documento" className="hover:underline">Aprovar Apontamentos</a></li>
             <li><a href="#" className="hover:underline">Definições</a></li>
             <li><a href="login" className="hover:underline">Sair</a></li>
             
