@@ -237,12 +237,6 @@ export default function SubmeterDocumento() {
 			setUploading(false);
 		}
 	};
-	
-	
-
-
-
-
 
 
 	return (

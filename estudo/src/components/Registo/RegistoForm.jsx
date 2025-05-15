@@ -34,6 +34,103 @@ export default function RegistoForm() {
     fetchCursos();
   }, []);
 
+  // Função para buscar o ID do tipo de notificação pela descrição
+  const getNotificationTypeId = async (descricao) => {
+    const { data, error } = await supabase
+      .from('notification_type')
+      .select('id_tipo_notificacao')
+      .eq('descricao', descricao)
+      .single();
+
+    if (error) {
+      console.error(`Erro ao buscar o ID do tipo de notificação para "${descricao}":`, error);
+      throw new Error(`Não foi possível encontrar o tipo de notificação para "${descricao}".`);
+    }
+
+    if (!data) {
+      throw new Error(`Tipo de notificação "${descricao}" não encontrado.`);
+    }
+
+    return data.id_tipo_notificacao;
+  };
+
+  // Função para buscar o ID do estado da notificação pela descrição
+  const getNotificationStateId = async (estado) => {
+    const { data, error } = await supabase
+      .from('notification_state')
+      .select('id_estado')
+      .eq('estado', estado)
+      .single();
+
+    if (error) {
+      console.error(`Erro ao buscar o ID do estado da notificação para "${estado}":`, error);
+      throw new Error(`Não foi possível encontrar o estado de notificação para "${estado}".`);
+    }
+
+    if (!data) {
+      throw new Error(`Estado de notificação "${estado}" não encontrado.`);
+    }
+
+    return data.id_estado;
+  };
+
+  // Função para criar notificação para um usuário específico
+  const createNotification = async (userId, message, tipoNotificacao = 'registo') => {
+    try {
+      const tipoNotificacaoId = await getNotificationTypeId(tipoNotificacao);
+      const estadoNotificacaoId = await getNotificationStateId('nao_lida');
+
+      const notificationData = {
+        id_user: userId,
+        created_at: new Date().toISOString(),
+        id_tipo_notification: tipoNotificacaoId,
+        id_estado: estadoNotificacaoId,
+        mensagem: message,
+      };
+
+      const { error: notificationError } = await supabase
+        .from("user_notifications")
+        .insert([notificationData]);
+
+      if (notificationError) {
+        console.error("Erro ao criar notificação:", notificationError);
+      }
+    } catch (error) {
+      console.error("Erro ao processar notificação:", error);
+    }
+  };
+  
+  // Função para buscar todos os usuários administradores
+  const getAdminUsers = async () => {
+    const { data, error } = await supabase
+      .from("user_details")
+      .select("id_user")
+      .eq("id_tipo_user", 1); // Admin type is 1
+      
+    if (error) {
+      console.error("Erro ao buscar administradores:", error);
+      return [];
+    }
+    
+    return data || [];
+  };
+  
+  // Função para notificar todos os administradores
+  const notifyAllAdmins = async (message, tipoNotificacao = 'registo') => {
+    try {
+      const admins = await getAdminUsers();
+      
+      // Para cada admin, criar uma notificação
+      const notificationPromises = admins.map(admin => 
+        createNotification(admin.id_user, message, tipoNotificacao)
+      );
+      
+      await Promise.all(notificationPromises);
+    } catch (error) {
+      console.error("Erro ao notificar administradores:", error);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -87,6 +184,10 @@ export default function RegistoForm() {
       setErro("Erro ao salvar os dados: " + insertError.message);
       return;
     }
+
+    // Criar notificação apenas para todos os administradores
+    const adminNotificationMessage = `Um novo usuário (${nome} - ${email}) submeteu um registo no sistema.`;
+    await notifyAllAdmins(adminNotificationMessage);
 
     setErro(null);
     router.push("/login");

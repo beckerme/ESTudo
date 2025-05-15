@@ -157,7 +157,6 @@ export default function ConsultarDocumento() {
     useEffect(() => {
         const fetchAvaliacoes = async () => {
             try {
-
                 // 🔍 Obter os dados do utilizador
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) return;
