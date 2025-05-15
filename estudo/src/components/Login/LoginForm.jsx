@@ -66,19 +66,22 @@ export default function LoginForm() {
 
        // Verifica se o tipo de usuário é 1
       if (userDetails.id_tipo_user === 1) {
-        router.push("/pag-inicial-admin");
+        localStorage.setItem("tipoUsuario", "admin");
+        router.push("/pag-inicial");
         return;
       }
 
       // Verifica se o tipo de usuário é 2
       if (userDetails.id_tipo_user === 2) {
-        router.push("/pag-inicial-mod");
+        localStorage.setItem("tipoUsuario", "mod");
+        router.push("/pag-inicial");
         return;
       }
 
       // Verifica se o tipo de usuário é 3
       if (userDetails.id_tipo_user === 3) {
-        router.push("/pag-inicial-aluno");
+        localStorage.setItem("tipoUsuario", "aluno");
+        router.push("/pag-inicial");
         return;
       }
 
