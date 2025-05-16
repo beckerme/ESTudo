@@ -22,13 +22,10 @@ export default function App() {
 
   // 🕵️‍♂️ Efeito para carregar o tipo de utilizador do localStorage e procurar as tags na montagem
   useEffect(() => {
-    const tipo = localStorage.getItem("tipoUsuario");             // 💾 Lê o tipo de utilizador do armazenamento local (síncrono)
-    setTipoUsuario(tipo);                                         // Define o estado do tipo de utilizador
-
-    // 🏷️ Chama a função para procurar as tags do Supabase assim que o componente monta
-    fetchTags();
-
-    // O array de dependências vazio [] garante que este efeito só roda UMA VEZ, na montagem inicial.
+    if (typeof window !== "undefined") {
+      const tipo = localStorage.getItem("tipoUsuario");
+      setTipoUsuario(tipo);
+    }
   }, []);
 
     // ⬇️ Função assíncrona para procurar a lista de tags na base de dados Supabase
