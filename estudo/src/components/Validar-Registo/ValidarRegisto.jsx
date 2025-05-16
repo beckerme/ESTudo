@@ -106,49 +106,48 @@ Equipa IPCB`
   };
 
   const handleValidateUser = async (id_user, email, nome) => {
-    setIsLoading(true);
-    
-    let novoTipoUser = 1;
+  setIsLoading(true);
 
-    if (email.includes("@ipcbcampus.pt")) {
-      novoTipoUser = 3;
-    } else if (email.includes("@ipcb.pt")) {
-      novoTipoUser = 2;
-    }
+  let novoTipoUser = 1;
+  if (email.includes("@ipcbcampus.pt")) {
+    novoTipoUser = 3;
+  } else if (email.includes("@ipcb.pt")) {
+    novoTipoUser = 2;
+  }
 
-    // Update user type in database
-    const { error } = await supabase
-      .from("user_details")
-      .update({ id_tipo_user: novoTipoUser })
-      .eq("id_user", id_user);
+  const { error } = await supabase
+    .from("user_details")
+    .update({ id_tipo_user: novoTipoUser })
+    .eq("id_user", id_user);
 
-    if (error) {
-      console.error("Erro ao validar utilizador:", error);
-      toast.error("Erro ao validar utilizador");
-      setIsLoading(false);
-    } else {
-      // Send notification to user
-      await createNotification(userId, "O seu registo foi validado com sucesso.");
+  if (error) {
+    console.error("Erro ao validar utilizador:", error);
+    toast.error("Erro ao validar utilizador");
+    setIsLoading(false);
+    return;
+  }
 
-      if (notificationSent) {
-        toast.success(`Utilizador ${nome} validado e notificado com sucesso!`);
-      } else {
-        toast.success(`Utilizador ${nome} validado, mas houve um problema ao enviar a notificação.`);
-      }
-      
-      // Update UI by refetching users
-      const { data: updatedUsers } = await supabase
-        .from("user_details")
-        .select("id_user, nome, id_tipo_user, email, id_curso")
-        .eq("id_tipo_user", 4);
-        
-      if (updatedUsers) {
-        setUsers(updatedUsers);
-      }
-      
-      setIsLoading(false);
-    }
-  };
+  const mensagem = "O seu registo foi validado com sucesso ";
+  const notificationSent = await createNotification(id_user, mensagem, "registo_validado");
+
+  if (notificationSent) {
+    toast.success(`Utilizador ${nome} validado e notificado com sucesso!`);
+  } else {
+    toast.success(`Utilizador ${nome} validado, mas houve um problema ao enviar a notificação.`);
+  }
+
+  const { data: updatedUsers } = await supabase
+    .from("user_details")
+    .select("id_user, nome, id_tipo_user, email, id_curso")
+    .eq("id_tipo_user", 4);
+
+  if (updatedUsers) {
+    setUsers(updatedUsers);
+  }
+
+  setIsLoading(false);
+};
+
 
   const handleDeactivateUser = async (id_user, nome) => {
     setIsLoading(true);
@@ -211,7 +210,7 @@ const getNotificationStateId = async (estado) => {
 };
 
 
-const createNotification = async (userId, message, tipoNotificacao = "validacao") => {
+const createNotification = async (userId, message, tipoNotificacao = "registo_validado") => {
   try {
     const tipoNotificacaoId = await getNotificationTypeId(tipoNotificacao);
     const estadoNotificacaoId = await getNotificationStateId("nao_lida");
@@ -228,11 +227,16 @@ const createNotification = async (userId, message, tipoNotificacao = "validacao"
 
     if (error) {
       console.error("Erro ao criar notificação:", error);
+      return false;
     }
+
+    return true;
   } catch (err) {
     console.error("Erro ao processar notificação:", err);
+    return false;
   }
 };
+
 
   return (
     <>
