@@ -25,6 +25,7 @@ export default function App() {
     if (typeof window !== "undefined") {
       const tipo = localStorage.getItem("tipoUsuario");
       setTipoUsuario(tipo);
+      fetchTags();
     }
   }, []);
 
