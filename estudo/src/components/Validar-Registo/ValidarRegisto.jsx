@@ -7,7 +7,6 @@ import { Kanit } from "next/font/google";
 import supabase from "@/app/config/supabaseClient";
 import { useRouter } from "next/navigation";
 
-
 const kanit = Kanit({
   subsets: ["latin"],
   weight: "400",
@@ -33,7 +32,7 @@ export default function ValidarRegisto() {
         setUsers(data);
       }
     };
-    
+
     const fetchCursos = async () => {
       const { data, error } = await supabase
         .from("curso")
@@ -65,7 +64,7 @@ export default function ValidarRegisto() {
         message: `A sua conta foi validada com sucesso. Bem-vindo!`,
         tipo: "validation",
         is_read: false,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       });
 
       if (error) {
@@ -79,7 +78,7 @@ export default function ValidarRegisto() {
       const userTypeNames = {
         1: "Estudante",
         2: "Professor",
-        3: "Estudante Erasmus"
+        3: "Estudante Erasmus",
       };
 
       const emailData = {
@@ -87,17 +86,19 @@ export default function ValidarRegisto() {
         subject: "Conta Validada - Sistema IPCB",
         body: `Olá,
         
-A sua conta foi validada com sucesso como ${userTypeNames[newUserType] || "Utilizador"}.
+A sua conta foi validada com sucesso como ${
+          userTypeNames[newUserType] || "Utilizador"
+        }.
 Agora pode aceder a todas as funcionalidades do sistema.
 
 Cumprimentos,
-Equipa IPCB`
+Equipa IPCB`,
       };
 
       // Here you would call your email sending function
       // This is just a placeholder - you need a real email sending service
       console.log("Email de notificação seria enviado:", emailData);
-      
+
       return true;
     } catch (error) {
       console.error("Erro ao processar notificação:", error);
@@ -106,52 +107,57 @@ Equipa IPCB`
   };
 
   const handleValidateUser = async (id_user, email, nome) => {
-  setIsLoading(true);
+    setIsLoading(true);
 
-  let novoTipoUser = 1;
-  if (email.includes("@ipcbcampus.pt")) {
-    novoTipoUser = 3;
-  } else if (email.includes("@ipcb.pt")) {
-    novoTipoUser = 2;
-  }
+    let novoTipoUser = 1;
+    if (email.includes("@ipcbcampus.pt")) {
+      novoTipoUser = 3;
+    } else if (email.includes("@ipcb.pt")) {
+      novoTipoUser = 2;
+    }
 
-  const { error } = await supabase
-    .from("user_details")
-    .update({ id_tipo_user: novoTipoUser })
-    .eq("id_user", id_user);
+    const { error } = await supabase
+      .from("user_details")
+      .update({ id_tipo_user: novoTipoUser })
+      .eq("id_user", id_user);
 
-  if (error) {
-    console.error("Erro ao validar utilizador:", error);
-    toast.error("Erro ao validar utilizador");
+    if (error) {
+      console.error("Erro ao validar utilizador:", error);
+      toast.error("Erro ao validar utilizador");
+      setIsLoading(false);
+      return;
+    }
+
+    const mensagem = "O seu registo foi validado com sucesso ";
+    const notificationSent = await createNotification(
+      id_user,
+      mensagem,
+      "registo_validado"
+    );
+
+    if (notificationSent) {
+      toast.success(`Utilizador ${nome} validado e notificado com sucesso!`);
+    } else {
+      toast.success(
+        `Utilizador ${nome} validado, mas houve um problema ao enviar a notificação.`
+      );
+    }
+
+    const { data: updatedUsers } = await supabase
+      .from("user_details")
+      .select("id_user, nome, id_tipo_user, email, id_curso")
+      .eq("id_tipo_user", 4);
+
+    if (updatedUsers) {
+      setUsers(updatedUsers);
+    }
+
     setIsLoading(false);
-    return;
-  }
-
-  const mensagem = "O seu registo foi validado com sucesso ";
-  const notificationSent = await createNotification(id_user, mensagem, "registo_validado");
-
-  if (notificationSent) {
-    toast.success(`Utilizador ${nome} validado e notificado com sucesso!`);
-  } else {
-    toast.success(`Utilizador ${nome} validado, mas houve um problema ao enviar a notificação.`);
-  }
-
-  const { data: updatedUsers } = await supabase
-    .from("user_details")
-    .select("id_user, nome, id_tipo_user, email, id_curso")
-    .eq("id_tipo_user", 4);
-
-  if (updatedUsers) {
-    setUsers(updatedUsers);
-  }
-
-  setIsLoading(false);
-};
-
+  };
 
   const handleDeactivateUser = async (id_user, nome) => {
     setIsLoading(true);
-    
+
     const { error } = await supabase
       .from("user_details")
       .update({ id_tipo_user: 5 })
@@ -162,81 +168,81 @@ Equipa IPCB`
       toast.error("Erro ao desativar utilizador");
     } else {
       toast.success(`Utilizador ${nome} desativado com sucesso!`);
-      
+
       // Update UI by refetching users
       const { data: updatedUsers } = await supabase
         .from("user_details")
         .select("id_user, nome, id_tipo_user, email, id_curso")
         .eq("id_tipo_user", 4);
-        
+
       if (updatedUsers) {
         setUsers(updatedUsers);
       }
     }
-    
+
     setIsLoading(false);
   };
 
-const getNotificationTypeId = async (descricao) => {
-  const { data, error } = await supabase
-    .from("notification_type")
-    .select("id_tipo_notificacao")
-    .eq("descricao", descricao)
-    .single();
+  const getNotificationTypeId = async (descricao) => {
+    const { data, error } = await supabase
+      .from("notification_type")
+      .select("id_tipo_notificacao")
+      .eq("descricao", descricao)
+      .single();
 
-  if (error || !data) {
-    console.error(`Erro ao buscar tipo de notificação "${descricao}"`, error);
-    throw new Error("Tipo de notificação não encontrado");
-  }
-
-  return data.id_tipo_notificacao;
-};
-
-
-
-const getNotificationStateId = async (estado) => {
-  const { data, error } = await supabase
-    .from("notification_state")
-    .select("id_estado")
-    .eq("estado", estado)
-    .single();
-
-  if (error || !data) {
-    console.error(`Erro ao buscar estado da notificação "${estado}"`, error);
-    throw new Error("Estado de notificação não encontrado");
-  }
-
-  return data.id_estado;
-};
-
-
-const createNotification = async (userId, message, tipoNotificacao = "registo_validado") => {
-  try {
-    const tipoNotificacaoId = await getNotificationTypeId(tipoNotificacao);
-    const estadoNotificacaoId = await getNotificationStateId("nao_lida");
-
-    const { error } = await supabase.from("user_notifications").insert([
-      {
-        id_user: userId,
-        created_at: new Date().toISOString(),
-        id_tipo_notification: tipoNotificacaoId,
-        id_estado: estadoNotificacaoId,
-        mensagem: message,
-      },
-    ]);
-
-    if (error) {
-      console.error("Erro ao criar notificação:", error);
-      return false;
+    if (error || !data) {
+      console.error(`Erro ao buscar tipo de notificação "${descricao}"`, error);
+      throw new Error("Tipo de notificação não encontrado");
     }
 
-    return true;
-  } catch (err) {
-    console.error("Erro ao processar notificação:", err);
-    return false;
-  }
-};
+    return data.id_tipo_notificacao;
+  };
 
+  const getNotificationStateId = async (estado) => {
+    const { data, error } = await supabase
+      .from("notification_state")
+      .select("id_estado")
+      .eq("estado", estado)
+      .single();
+
+    if (error || !data) {
+      console.error(`Erro ao buscar estado da notificação "${estado}"`, error);
+      throw new Error("Estado de notificação não encontrado");
+    }
+
+    return data.id_estado;
+  };
+
+  const createNotification = async (
+    userId,
+    message,
+    tipoNotificacao = "registo_validado"
+  ) => {
+    try {
+      const tipoNotificacaoId = await getNotificationTypeId(tipoNotificacao);
+      const estadoNotificacaoId = await getNotificationStateId("nao_lida");
+
+      const { error } = await supabase.from("user_notifications").insert([
+        {
+          id_user: userId,
+          created_at: new Date().toISOString(),
+          id_tipo_notification: tipoNotificacaoId,
+          id_estado: estadoNotificacaoId,
+          mensagem: message,
+        },
+      ]);
+
+      if (error) {
+        console.error("Erro ao criar notificação:", error);
+        return false;
+      }
+
+      return true;
+    } catch (err) {
+      console.error("Erro ao processar notificação:", err);
+      return false;
+    }
+  };
 
   return (
     <>
@@ -261,7 +267,8 @@ const createNotification = async (userId, message, tipoNotificacao = "registo_va
           {/* Contador de Registos Pendentes */}
           <div className="bg-blue-800 rounded-lg p-3 mb-4 text-center">
             <p className="text-white">
-              <span className="font-bold">{users.length}</span> registos pendentes de validação
+              <span className="font-bold">{users.length}</span> registos
+              pendentes de validação
             </p>
           </div>
 
@@ -297,7 +304,9 @@ const createNotification = async (userId, message, tipoNotificacao = "registo_va
                       <button
                         disabled={isLoading}
                         className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md transition-colors"
-                        onClick={() => handleDeactivateUser(user.id_user, user.nome)}
+                        onClick={() =>
+                          handleDeactivateUser(user.id_user, user.nome)
+                        }
                       >
                         <XCircle size={16} />
                         <span>Rejeitar</span>
@@ -305,7 +314,13 @@ const createNotification = async (userId, message, tipoNotificacao = "registo_va
                       <button
                         disabled={isLoading}
                         className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md transition-colors"
-                        onClick={() => handleValidateUser(user.id_user, user.email, user.nome)}
+                        onClick={() =>
+                          handleValidateUser(
+                            user.id_user,
+                            user.email,
+                            user.nome
+                          )
+                        }
                       >
                         <CheckCircle size={16} />
                         <span>Validar</span>
