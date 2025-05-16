@@ -6,7 +6,7 @@ import { Search, CheckCircle, XCircle } from "lucide-react";
 import { Kanit } from "next/font/google";
 import supabase from "@/app/config/supabaseClient";
 import { useRouter } from "next/navigation";
-import { toast } from "react-hot-toast"; // Import toast for UI notifications
+
 
 const kanit = Kanit({
   subsets: ["latin"],
