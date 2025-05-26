@@ -71,6 +71,7 @@ export default function HeaderInicio() {
           <ul className="space-y-4 text-center">
             <li><a href="apagar-conta" className="hover:underline">Perfis</a></li>
             <li><a href="validar-registo" className="hover:underline">Aprovar Registos</a></li>
+             <li><a href="estatisticas" className="hover:underline">Estatisticas</a></li>
             <li>
               <button
                 onClick={() => setIsLogoutPopUpOpen(true)}

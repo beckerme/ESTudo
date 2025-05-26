@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Header from "../HeaderInicioAluno";
+import Header from "../HeaderInicioAdmin";
 import { Search, CheckCircle, XCircle } from "lucide-react";
 import { Kanit } from "next/font/google";
 import supabase from "@/app/config/supabaseClient";
