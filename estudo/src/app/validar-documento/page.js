@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 
 export default function App() {
   const router = useRouter();
-  const [autorizado, setAutorizado] = useState(null); // null = verificando
+  const [autorizado, setAutorizado] = useState(null); 
 
   useEffect(() => {
     const tipo = localStorage.getItem("tipoUsuario");
