@@ -2,13 +2,12 @@
 
 import { Kanit } from "next/font/google";
 import Header from "../HeaderInicioAluno";
-import { useState, useEffect } from 'react';
-import { Search, XCircle, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Search, XCircle, CheckCircle } from "lucide-react";
 import supabase from "@/app/config/supabaseClient";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 
-
-const kanit = Kanit({ subsets: ['latin'], weight: "400" });
+const kanit = Kanit({ subsets: ["latin"], weight: "400" });
 
 export default function ValidarDocumento() {
   const [search, setSearch] = useState("");
@@ -26,8 +25,9 @@ export default function ValidarDocumento() {
 
   const fetchDocuments = async () => {
     const { data, error } = await supabase
-      .from('user_documents')
-      .select('id, name, author, estado, tag_id');
+      .from("user_documents")
+      .select("id, name, author, estado, tag_id, user_id")
+      .eq("estado", ESTADOS.por_aprovar);
 
     if (error) console.error("Erro ao buscar documentos:", error.message);
     else setDocuments(data);
@@ -35,8 +35,8 @@ export default function ValidarDocumento() {
 
   const fetchTags = async () => {
     const { data, error } = await supabase
-      .from('document_tags')
-      .select('id, designacao');
+      .from("document_tags")
+      .select("id, designacao");
 
     if (error) console.error("Erro ao buscar tags:", error.message);
     else setTags(data);
@@ -50,22 +50,34 @@ export default function ValidarDocumento() {
   };
 
   const updateEstado = async (id, novoEstado) => {
-    const { error } = await supabase
-      .from('user_documents')
-      .update({ estado: novoEstado })
-      .eq('id', id);
+    const doc = documents.find((d) => d.id === id);
+    if (!doc) return;
 
-    if (error) console.error("Erro ao atualizar estado:", error.message);
-    else setDocuments((prev) => prev.filter((doc) => doc.id !== id));
+    const { error } = await supabase
+      .from("user_documents")
+      .update({ estado: novoEstado })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Erro ao atualizar estado:", error.message);
+      return;
+    }
+
+    if (novoEstado === ESTADOS.publicado) {
+      const mensagem = `O seu documento "${doc.name}" foi aprovado e publicado com sucesso.`;
+      await createNotification(doc.user_id, mensagem, "documento_validado");
+    }
+
+    setDocuments((prev) => prev.filter((doc) => doc.id !== id));
   };
 
   const updateTagId = async () => {
     if (selectedDocId == null || selectedTagId == null) return;
 
     const { error } = await supabase
-      .from('user_documents')
+      .from("user_documents")
       .update({ tag_id: selectedTagId })
-      .eq('id', selectedDocId);
+      .eq("id", selectedDocId);
 
     if (error) {
       console.error("Erro ao atualizar tag:", error.message);
@@ -77,20 +89,98 @@ export default function ValidarDocumento() {
 
   const getEstadoLabel = (estado) => {
     switch (estado) {
-      case ESTADOS.por_aprovar: return "Por Aprovar";
-      case ESTADOS.publicado: return "Publicado";
-      default: return "Desconhecido";
+      case ESTADOS.por_aprovar:
+        return "Por Aprovar";
+      case ESTADOS.publicado:
+        return "Publicado";
+      default:
+        return "Desconhecido";
     }
   };
 
-  useEffect(() => { fetchDocuments(); }, []);
+  const createNotification = async (
+    userId,
+    message,
+    tipoNotificacao = "documento_validado"
+  ) => {
+    try {
+      // Verificar se o userId é válido
+      if (!userId) {
+        console.error("ID do usuário inválido:", userId);
+        return;
+      }
 
+      // Buscar o tipo de notificação
+      const { data: tipoData, error: tipoError } = await supabase
+        .from("notification_type")
+        .select("id_tipo_notificacao")
+        .eq("descricao", tipoNotificacao)
+        .single();
 
+      if (tipoError) {
+        console.error("Erro ao buscar tipo de notificação:", tipoError.message);
+        return;
+      }
 
+      // Buscar o estado da notificação
+      const { data: estadoData, error: estadoError } = await supabase
+        .from("notification_state")
+        .select("id_estado")
+        .eq("estado", "nao_lida")
+        .single();
+
+      if (estadoError) {
+        console.error("Erro ao buscar estado da notificação:", estadoError.message);
+        return;
+      }
+
+      // Log para debug antes de inserir
+      console.log("Dados para inserção de notificação:", {
+        id_user: userId,
+        created_at: new Date().toISOString(),
+        id_tipo_notificacao: tipoData?.id_tipo_notificacao,
+        id_estado: estadoData?.id_estado,
+        mensagem: message
+      });
+
+      // Verificar se todos os dados necessários existem
+      if (!tipoData?.id_tipo_notificacao || !estadoData?.id_estado) {
+        console.error("Dados necessários para a notificação estão faltando");
+        return;
+      }
+
+      // Inserir a notificação
+      const { error } = await supabase.from("user_notifications").insert([
+        {
+          id_user: userId,
+          created_at: new Date().toISOString(),
+          id_tipo_notification: tipoData.id_tipo_notificacao,
+          id_estado: estadoData.id_estado,
+          mensagem: message,
+        },
+      ]);
+
+      if (error) {
+        console.error("Erro ao inserir notificação:", error.message);
+        // Log do erro completo para debug
+        console.error(error);
+      } else {
+        console.log("Notificação criada com sucesso");
+      }
+    } catch (err) {
+      console.error("Erro ao criar notificação:", err.message || err);
+    }
+  };
+
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
 
   return (
     <>
-      <div><Header /></div>
+      <div>
+        <Header />
+      </div>
 
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="w-full max-w-4xl bg-blue-900 p-6 rounded-xl shadow-lg">
@@ -139,12 +229,16 @@ export default function ValidarDocumento() {
                         <XCircle
                           className="text-red-500 cursor-pointer"
                           size={24}
-                          onClick={() => updateEstado(doc.id, ESTADOS.nao_aprovado)}
+                          onClick={() =>
+                            updateEstado(doc.id, ESTADOS.nao_aprovado)
+                          }
                         />
                         <CheckCircle
                           className="text-green-500 cursor-pointer"
                           size={24}
-                          onClick={() => updateEstado(doc.id, ESTADOS.publicado)}
+                          onClick={() =>
+                            updateEstado(doc.id, ESTADOS.publicado)
+                          }
                         />
                       </>
                     )}
@@ -165,7 +259,9 @@ export default function ValidarDocumento() {
               onChange={(e) => setSelectedTagId(Number(e.target.value))}
               className="w-full p-2 border border-gray-300 rounded"
             >
-              <option value="" disabled>Selecione uma tag</option>
+              <option value="" disabled>
+                Selecione uma tag
+              </option>
               {tags.map((tag) => (
                 <option key={tag.id} value={tag.id}>
                   {tag.designacao}

@@ -17,8 +17,14 @@
     "next-i18next": "^15.4.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+<<<<<<< HEAD
     "react-i18next": "^15.5.1",
     "react-icons": "^5.5.0"
+=======
+    "react-hot-toast": "^2.5.2",
+    "react-icons": "^5.5.0",
+    "recharts": "^2.15.3"
+>>>>>>> 9e960f7883d70ed6072a1e082a0b915298f8254d
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

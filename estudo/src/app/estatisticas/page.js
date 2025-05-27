@@ -1,18 +1,18 @@
 "use client";
 
-import ValidarDocumento from "@/components/validar-documento/validar-documento";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Estatisticas from "@/components/Estatisticas/Estatisticas";
 
 
 export default function App() {
   const router = useRouter();
-  const [autorizado, setAutorizado] = useState(null); 
+  const [autorizado, setAutorizado] = useState(null); // null = verificando
 
   useEffect(() => {
     const tipo = localStorage.getItem("tipoUsuario");
 
-    if (tipo === "mod") {
+    if (tipo === "admin") {
       setAutorizado(true);
     } else {
       setAutorizado(false);
@@ -28,7 +28,6 @@ export default function App() {
     return null; 
   }
 
-  return <ValidarDocumento/>;
+  return <Estatisticas/>;
+
 }
-
-
