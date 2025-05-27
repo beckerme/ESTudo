@@ -3,10 +3,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Notificacao from "@/components/Notificacao"; // Notificações
 
-export default function HeaderInicio() {
+export default function HeaderInicioAdmin() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isProfileSidebarOpen, setIsProfileSidebarOpen] = useState(false);
   const [isLogoutPopUpOpen, setIsLogoutPopUpOpen] = useState(false);
+  const [currentLang, setCurrentLang] = useState("pt");
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
 
   const router = useRouter();
 
@@ -15,11 +17,16 @@ export default function HeaderInicio() {
     router.push("/login");
   };
 
+  const toggleLang = (lang) => {
+    setCurrentLang(lang);
+    setIsLangDropdownOpen(false);
+    // Aqui você pode adicionar lógica para trocar o idioma global do site
+  };
+
   return (
     <>
       <header>
         <div className="w-full h-[80px] bg-white flex items-center justify-between px-10 rounded-bl-[40px] rounded-br-[40px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
-          
           {/* Ícone de Perfil */}
           <div
             className="w-12 h-12 flex items-center justify-center cursor-pointer"
@@ -43,9 +50,42 @@ export default function HeaderInicio() {
               <Image src="/notification.png" width={30} height={30} alt="sino de notificações" />
             </div>
 
-            {/* Bandeira de Portugal */}
-            <div className="flex w-8 h-12 items-center rounded-md overflow-hidden">
-              <Image src="/bandeira_portugal.png" width={100} height={100} alt="bandeira de Portugal" />
+            {/* Seletor de Idioma */}
+            <div className="relative ml-4">
+              <div
+                className="flex w-8 h-12 items-center rounded-md overflow-hidden cursor-pointer"
+                onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+              >
+                {currentLang === "pt" ? (
+                  <Image src="/bandeira_portugal.png" width={100} height={100} alt="Bandeira de Portugal" />
+                ) : (
+                  <Image src="/bandeira_inglaterra.png" width={100} height={100} alt="Bandeira da Inglaterra" />
+                )}
+              </div>
+              {isLangDropdownOpen && (
+                <div className="absolute top-full right-0 mt-2 w-32 bg-white rounded-md shadow-lg z-20">
+                  <ul>
+                    {currentLang !== "pt" && (
+                      <li
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                        onClick={() => toggleLang("pt")}
+                      >
+                        <Image src="/bandeira_portugal.png" width={20} height={20} alt="Bandeira de Portugal" />
+                        Português
+                      </li>
+                    )}
+                    {currentLang !== "en" && (
+                      <li
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                        onClick={() => toggleLang("en")}
+                      >
+                        <Image src="/bandeira_inglaterra.png" width={20} height={20} alt="Bandeira da Inglaterra" />
+                        English
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         </div>

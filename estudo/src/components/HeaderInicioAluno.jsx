@@ -1,17 +1,57 @@
 "use client"
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Notificacao from "@/components/Notificacao"; // Notificações
 
 export default function HeaderInicio() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isProfileSidebarOpen, setIsProfileSidebarOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [currentLang, setCurrentLang] = useState("pt");
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+
+  // Textos em ambos os idiomas
+  const texts = {
+    pt: {
+      submit: "Submeter Documentos",
+      profileMenu: "Menu do Perfil",
+      logout: "Sair",
+      confirmLogout: "Tem a certeza que deseja sair?",
+      cancel: "Cancelar"
+    },
+    en: {
+      submit: "Submit Documents",
+      profileMenu: "Profile Menu",
+      logout: "Logout",
+      confirmLogout: "Are you sure you want to logout?",
+      cancel: "Cancel"
+    }
+  };
+
+  // Sincroniza idioma com localStorage (usado pelo restante do site)
+  useEffect(() => {
+    const lang = localStorage.getItem("lang") || "pt";
+    setCurrentLang(lang);
+    // Atualização imediata ao trocar a bandeira (escuta evento customizado)
+    const onLangChange = (e) => {
+      if (e.detail && e.detail.lang) setCurrentLang(e.detail.lang);
+    };
+    window.addEventListener("langChange", onLangChange);
+    return () => window.removeEventListener("langChange", onLangChange);
+  }, []);
 
   const handleLogout = () => {
     setIsLogoutModalOpen(false);
     window.location.href = "/login"; // Ou use router.push se preferir
+  };
+
+  const toggleLang = (lang) => {
+    setCurrentLang(lang);
+    setIsLangDropdownOpen(false);
+    localStorage.setItem("lang", lang); // Salva globalmente
+    // Dispara evento customizado para atualização imediata em toda a app
+    window.dispatchEvent(new CustomEvent("langChange", { detail: { lang } }));
   };
 
   return (
@@ -42,9 +82,42 @@ export default function HeaderInicio() {
               <Image src="/notification.png" width={30} height={30} alt="sino de notificações" />
             </div>
 
-            {/* Bandeira de Portugal */}
-            <div className="flex w-8 h-12 items-center rounded-md overflow-hidden">
-              <Image src="/bandeira_portugal.png" width={100} height={100} alt="bandeira de Portugal" />
+            {/* Seletor de Idioma */}
+            <div className="relative ml-4">
+              <div
+                className="flex w-8 h-12 items-center rounded-md overflow-hidden cursor-pointer"
+                onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+              >
+                {currentLang === "pt" ? (
+                  <Image src="/bandeira_portugal.png" width={100} height={100} alt="Bandeira de Portugal" />
+                ) : (
+                  <Image src="/bandeira_inglaterra.png" width={100} height={100} alt="Bandeira da Inglaterra" />
+                )}
+              </div>
+              {isLangDropdownOpen && (
+                <div className="absolute top-full right-0 mt-2 w-32 bg-white rounded-md shadow-lg z-20">
+                  <ul>
+                    {currentLang !== "pt" && (
+                      <li
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                        onClick={() => toggleLang("pt")}
+                      >
+                        <Image src="/bandeira_portugal.png" width={20} height={20} alt="Bandeira de Portugal" />
+                        Português
+                      </li>
+                    )}
+                    {currentLang !== "en" && (
+                      <li
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                        onClick={() => toggleLang("en")}
+                      >
+                        <Image src="/bandeira_inglaterra.png" width={20} height={20} alt="Bandeira da Inglaterra" />
+                        English
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -71,14 +144,14 @@ export default function HeaderInicio() {
 
         <div className="flex flex-col items-center mt-10">
           <Image src="/user.png" width={100} height={100} alt="foto do utilizador" className="rounded-full mb-6" />
-          <h2 className="text-xl font-bold mb-6">Menu do Perfil</h2>
+          <h2 className="text-xl font-bold mb-6">{texts[currentLang].profileMenu}</h2>
           <ul className="space-y-4 text-center">
             <li>
               <a
                 href="submeter-doc"
                 className={`hover:underline ${isLogoutModalOpen ? "pointer-events-none opacity-50" : ""}`}
               >
-                Submeter Documentos
+                {texts[currentLang].submit}
               </a>
             </li>
             <li>
@@ -87,7 +160,7 @@ export default function HeaderInicio() {
                 className={`hover:underline text-red-600 ${isLogoutModalOpen ? "pointer-events-none opacity-50" : ""}`}
                 disabled={isLogoutModalOpen}
               >
-                Sair
+                {texts[currentLang].logout}
               </button>
             </li>
           </ul>
@@ -112,19 +185,19 @@ export default function HeaderInicio() {
 
           <div className="fixed inset-0 z-70 flex items-center justify-center pointer-events-none">
             <div className="relative z-70 bg-white rounded-xl shadow-lg p-8 w-[90%] max-w-md text-center pointer-events-auto">
-              <h3 className="text-xl font-semibold mb-4">Tem a certeza que deseja sair?</h3>
+              <h3 className="text-xl font-semibold mb-4">{texts[currentLang].confirmLogout}</h3>
               <div className="flex justify-center gap-4 mt-6">
                 <button
                   className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
                   onClick={() => setIsLogoutModalOpen(false)}
                 >
-                  Cancelar
+                  {texts[currentLang].cancel}
                 </button>
                 <button
                   className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
                   onClick={handleLogout}
                 >
-                  Sair
+                  {texts[currentLang].logout}
                 </button>
               </div>
             </div>
