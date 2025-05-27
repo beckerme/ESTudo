@@ -25,6 +25,45 @@ export default function App() {
 
   const router = useRouter();                                     // 🚀 Hook para permitir navegação no Next.js
 
+  // Textos multilíngues para a página de pesquisa
+  const texts = {
+    pt: {
+      appTitle: "ESTudo",
+      appSubtitle: "Aplicação Universitária de Partilha de Documentos",
+      searchResults: "Resultados para:",
+      noDocsFound: "Nenhum documento encontrado.",
+      tryAdjustFilters: "Tente ajustar os filtros de pesquisa.",
+      noDocsAvailable: "Não há documentos disponíveis.",
+      error: "Erro: ",
+      searchPlaceholder: "Pesquise por apontamentos",
+      allCategories: "Todas as Categorias"
+    },
+    en: {
+      appTitle: "ESTudo",
+      appSubtitle: "University Document-Sharing App",
+      searchResults: "Results for:",
+      noDocsFound: "No documents found.",
+      tryAdjustFilters: "Try adjusting the search filters.",
+      noDocsAvailable: "No documents available.",
+      error: "Error: ",
+      searchPlaceholder: "Search for notes",
+      allCategories: "All Categories"
+    }
+  };
+
+  const [currentLang, setCurrentLang] = useState("pt");
+
+  useEffect(() => {
+    const lang = localStorage.getItem("lang") || "pt";
+    setCurrentLang(lang);
+    // Atualização imediata ao trocar a bandeira (escuta evento customizado)
+    const onLangChange = (e) => {
+      if (e.detail && e.detail.lang) setCurrentLang(e.detail.lang);
+    };
+    window.addEventListener("langChange", onLangChange);
+    return () => window.removeEventListener("langChange", onLangChange);
+  }, []);
+
   // 🕵️‍♂️ Efeito para carregar o tipo de utilizador do localStorage e procurar as tags na montagem
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -138,7 +177,7 @@ export default function App() {
   };
 
   // 🚫 Exibe uma mensagem de erro se um erro ocorreu durante a procura no Supabase
-  if (error) return <div className="text-center p-4 text-red-500">Erro: {error}</div>;
+  if (error) return <div className="text-center p-4 text-red-500">{texts[currentLang].error}{error}</div>;
 
   // Verifica se há pesquisa ativa (termo ou tag selecionada)
   const hasActiveSearch = debouncedTermoPesquisa.trim() || selectedTagId;
@@ -155,8 +194,8 @@ export default function App() {
       <div className="flex flex-col items-center w-full px-4 py-6 my-auto">
         {/* 📄 Títulos principais da página */}
         <div className="text-center mb-4">
-          <h1 className="text-3xl font-bold text-gray-900">ESTudo</h1> 
-          <p className="text-lg text-gray-700 mt-2">University Document-Sharing App</p>
+          <h1 className="text-3xl font-bold text-gray-900">{texts[currentLang].appTitle}</h1> 
+          <p className="text-lg text-gray-700 mt-2">{texts[currentLang].appSubtitle}</p>
         </div>
 
         {/* 🔍 Secção da Barra de Pesquisa */}
@@ -166,6 +205,7 @@ export default function App() {
             onChange={handleTermoPesquisaChange}
             onSearch={handleSearchSubmit}
             value={termoPesquisa}
+            placeholder={texts[currentLang].searchPlaceholder}
           />
         </div>
 
@@ -175,13 +215,14 @@ export default function App() {
             tags={tags}
             onTagChange={handleTagChange}
             activeTagId={selectedTagId}
+            allCategoriesLabel={texts[currentLang].allCategories}
           />
         </div>
 
         {/* 🔍 Exibe o termo de pesquisa se presente */}
         {termoPesquisa && (
           <div className="w-full text-center mt-4 text-lg text-gray-700">
-            Resultados para: <span className="font-semibold">{termoPesquisa}</span>
+            {texts[currentLang].searchResults} <span className="font-semibold">{termoPesquisa}</span>
           </div>
         )}
 
@@ -200,11 +241,11 @@ export default function App() {
                 <div className="text-center text-gray-600 mt-8">
                   {hasActiveSearch ? (
                     <>
-                      <p>Nenhum documento encontrado.</p>
-                      <p className="mt-2 text-sm">Tente ajustar os filtros de pesquisa.</p>
+                      <p>{texts[currentLang].noDocsFound}</p>
+                      <p className="mt-2 text-sm">{texts[currentLang].tryAdjustFilters}</p>
                     </>
                   ) : (
-                    <p>Não há documentos disponíveis.</p>
+                    <p>{texts[currentLang].noDocsAvailable}</p>
                   )}
                 </div>
               )

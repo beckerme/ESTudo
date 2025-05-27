@@ -3,12 +3,10 @@
 // Imports necessários
 import { Kanit } from "next/font/google";
 import HeaderInicio from "../HeaderInicioAluno";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Upload, Search } from 'lucide-react';
 import supabase from "@/app/config/supabaseClient";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-
 
 // Fonte Kanit
 const kanit = Kanit({
@@ -26,14 +24,67 @@ export default function SubmeterDocumento() {
 	const [publicURL, setPublicURL] = useState("");
 	const [documento, setDocumento] = useState(null);
 
+	// Textos multilíngues para a página de submissão
+	const texts = {
+		pt: {
+			fileTypeError: "Apenas ficheiros PDF são permitidos!",
+			fileSizeError: "Tamanho máximo: 50MB",
+			noFile: "Nenhum ficheiro selecionado!",
+			userError: "Não foi possível obter o utilizador.",
+			userDetailsError: "Erro ao obter detalhes do utilizador.",
+			tipoUserError: "Erro ao verificar o tipo de utilizador.",
+			alunoOnly: "Apenas utilizadores do tipo 'aluno' podem submeter documentos.",
+			storageError: "Erro ao fazer upload do ficheiro.",
+			dbError: "Erro ao salvar metadados do documento.",
+			notificationError: "Erro ao criar notificação.",
+			success: "Ficheiro submetido com sucesso!",
+			dropInfo: "Para submeter, pode arrastar os ficheiros",
+			or: "ou",
+			searchFiles: "Procurar nos Ficheiros",
+			selectedFile: "Ficheiro selecionado:",
+			submit: "Submeter",
+			processing: "A processar..."
+		},
+		en: {
+			fileTypeError: "Only PDF files are allowed!",
+			fileSizeError: "Maximum size: 50MB",
+			noFile: "No file selected!",
+			userError: "Could not get user.",
+			userDetailsError: "Error getting user details.",
+			tipoUserError: "Error checking user type.",
+			alunoOnly: "Only users of type 'student' can submit documents.",
+			storageError: "Error uploading file.",
+			dbError: "Error saving document metadata.",
+			notificationError: "Error creating notification.",
+			success: "File submitted successfully!",
+			dropInfo: "To submit, you can drag and drop files",
+			or: "or",
+			searchFiles: "Browse Files",
+			selectedFile: "Selected file:",
+			submit: "Submit",
+			processing: "Processing..."
+		}
+	};
+
+	const [currentLang, setCurrentLang] = useState("pt");
+	useEffect(() => {
+		const lang = localStorage.getItem("lang") || "pt";
+		setCurrentLang(lang);
+		const onLangChange = (e) => {
+			if (e.detail && e.detail.lang) setCurrentLang(e.detail.lang);
+		};
+		window.addEventListener("langChange", onLangChange);
+		return () => window.removeEventListener("langChange", onLangChange);
+	}, []);
+
 	// Função de validação separada para reutilização
 	const validateFile = (file) => {
 		if (file.type !== "application/pdf") {
-			return "Apenas ficheiros PDF são permitidos!";
+			return texts[currentLang].fileTypeError;
 		}
 
 		if (file.size > 50000000) {
-			return "Tamanho máximo: 50MB";
+			return texts[currentLang].fileSizeError;
 		}
 		
 		return null;
@@ -92,7 +143,7 @@ export default function SubmeterDocumento() {
 		e.preventDefault();
 	
 		if (!ficheiro) {
-			setErro("Nenhum ficheiro selecionado!");
+			setErro(texts[currentLang].noFile);
 			return;
 		}
 	
@@ -102,7 +153,7 @@ export default function SubmeterDocumento() {
 	
 			// Obter o utilizador atual
 			const { data: { user }, error: userError } = await supabase.auth.getUser();
-			if (userError || !user) throw new Error("Não foi possível obter o utilizador.");
+			if (userError || !user) throw new Error(texts[currentLang].userError);
 	
 			const user_id = user.id;
 	
@@ -113,7 +164,7 @@ export default function SubmeterDocumento() {
 				.eq("id_user", user_id)
 				.single();
 	
-			if (userDetailsError || !userDetails) throw new Error("Erro ao obter detalhes do utilizador.");
+			if (userDetailsError || !userDetails) throw new Error(texts[currentLang].userDetailsError);
 	
 			// Buscar o tipo_user pelo id_tipo_user
 			const { data: tipoUserData, error: tipoUserError } = await supabase
@@ -122,11 +173,11 @@ export default function SubmeterDocumento() {
 				.eq("id", userDetails.id_tipo_user)
 				.single();
 	
-			if (tipoUserError || !tipoUserData) throw new Error("Erro ao verificar o tipo de utilizador.");
+			if (tipoUserError || !tipoUserData) throw new Error(texts[currentLang].tipoUserError);
 	
 			// Verificar se é aluno
 			if (tipoUserData.tipo_user !== "aluno") {
-				setErro("Apenas utilizadores do tipo 'aluno' podem submeter documentos.");
+				setErro(texts[currentLang].alunoOnly);
 				setUploading(false);
 				return;
 			}
@@ -140,7 +191,7 @@ export default function SubmeterDocumento() {
 					contentType: ficheiro.type,
 				});
 	
-			if (storageError) throw storageError;
+			if (storageError) throw new Error(texts[currentLang].storageError);
 	
 			const { data: { publicURL } } = supabase.storage
 				.from("documentos")
@@ -163,10 +214,10 @@ export default function SubmeterDocumento() {
 				.from("user_documents")
 				.insert([sendDocumentData]);
 	
-			if (dbError) throw dbError;
+			if (dbError) throw new Error(texts[currentLang].dbError);
 
             // --- INSERIR NOTIFICAÇÃO ---
-            const notificationMessage = `O documento "${ficheiro.name}" foi submetido com sucesso.`;
+            const notificationMessage = `${texts[currentLang].success} \"${ficheiro.name}\".`;
 
 			// Função para buscar o ID do tipo de notificação pela descrição
     		const getNotificationTypeId = async (descricao) => {
@@ -225,14 +276,14 @@ export default function SubmeterDocumento() {
                 .insert([notificationData]);
 
             if (notificationError) {
-                console.error("Erro ao criar notificação:", notificationError);
+                console.error(texts[currentLang].notificationError, notificationError);
             }
             // --- FIM INSERIR NOTIFICAÇÃO ---
 	
-			alert("Ficheiro submetido com sucesso!");
+			alert(texts[currentLang].success);
 	
 		} catch (error) {
-			setErro("Erro: " + error.message);
+			setErro(texts[currentLang].errorPrefix ? texts[currentLang].errorPrefix + error.message : error.message);
 		} finally {
 			setUploading(false);
 		}
@@ -271,27 +322,27 @@ export default function SubmeterDocumento() {
 						
 						{/*ALTEREI ESTA DIV PARA TER MT-10*/}
 						{/* Informações para o utilizador */}
-						<p className="font-semibold text-2xl ">Para submeter, pode arrastar os ficheiros</p>
-						<span className="my-2 text-2xl">ou</span>
+						<p className="font-semibold text-2xl ">{texts[currentLang].dropInfo}</p>
+						<span className="my-2 text-2xl">{texts[currentLang].or}</span>
 						
 						{/* Botão para selecionar o ficheiro */}
 						<label className="cursor-pointer bg-[#0369A9] hover:bg-[#0A3C5C] px-4 py-2 rounded-full flex items-center gap-2 text-2xl">
 							<Search size={18} />
-							Procurar nos Ficheiros
+							{texts[currentLang].searchFiles}
 							<input type="file" multiple className="hidden" onChange={handleFileChange} accept=".pdf,application/pdf" />
 						</label>
 
 						{/* Mostrar o nome do ficheiro selecionado */}
 						<div className="my-10">
 							{nomeFicheiro && (
-								<p>Ficheiro selecionado: <strong>{nomeFicheiro}</strong></p>
+								<p>{texts[currentLang].selectedFile} <strong>{nomeFicheiro}</strong></p>
 							)}
 						</div>
 						
 						{/* Botão de submissão (só aparece se um arquivo for selecionado) */}
 						{documento && (
 							<button onClick={handleSubmit} disabled={uploading || !ficheiro} className="mb-20 bg-green-600 hover:bg-green-800 px-6 py-2 rounded-full flex items-center gap-2 text-white text-2xl">
-								{uploading ? 'A processar...' : 'Submeter'} <Upload size={18} />
+								{uploading ? texts[currentLang].processing : texts[currentLang].submit} <Upload size={18} />
 							</button>
 						)}
 

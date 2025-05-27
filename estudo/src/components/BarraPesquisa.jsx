@@ -1,4 +1,4 @@
- // ✒️ Importa a fonte Kanit do Google Fonts
+// ✒️ Importa a fonte Kanit do Google Fonts
 import { Kanit } from "next/font/google";
 
 // ⚙️ Configuração da fonte Kanit: subset 'latin' e peso '400'
@@ -9,7 +9,7 @@ const kanit = Kanit({
 
 // 🔍 Componente BarraPesquisa: um campo de input para pesquisa
 // Aceita as props `onChange` (para mudanças no texto) e `onSearch` (para ação de pesquisa, e.g., Enter)
-export const BarraPesquisa = ({ onChange, onSearch }) => {
+export const BarraPesquisa = ({ onChange, onSearch, placeholder }) => {
 
   // ⌨️ Função para lidar com a pressão de teclas no input
   const handleKeyPress = (event) => {
@@ -23,7 +23,7 @@ export const BarraPesquisa = ({ onChange, onSearch }) => {
     <input
       className={`bg-[#007CC2] rounded-3xl w-[49vw] h-[6vh] px-3
                   placeholder:text-white text-white placeholder:${kanit.className}`} 
-      placeholder="Pesquise por apontamentos"                                                 // ✍️ Texto placeholder
+      placeholder={placeholder || "Pesquise por apontamentos"} // agora recebe placeholder por prop
       onChange={onChange}                                                                     // 🔄 Chama a função onChange quando o texto muda
       onKeyDown={handleKeyPress}                                                              // 👇 Chama handleKeyPress quando uma tecla é pressionada
       type="search"                                                                           // ℹ️ Tipo de input semântico para campos de pesquisa

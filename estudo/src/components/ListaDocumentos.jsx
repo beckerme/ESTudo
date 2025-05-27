@@ -21,6 +21,38 @@ export default function ListaDocumentos({ documents: propDocuments, termoPesquis
   // Este estado ajuda a distinguir entre 'ainda a carregar' e 'carregado mas sem resultados'.
   const [hasLoadedInitially, setHasLoadedInitially] = useState(false);
 
+  // Textos multilíngues para o botão Visualizar e notificações
+  const texts = {
+    pt: {
+      view: "Visualizar",
+      author: "Autor",
+      unknown: "Desconhecido",
+      createdAt: "Criado em",
+      notFound: "Nenhum documento encontrado com os critérios de pesquisa.",
+      sessionError: "Erro de sessão:",
+      notAuthenticated: "Utilizador não autenticado. A redirecionar para o login..."
+    },
+    en: {
+      view: "View",
+      author: "Author",
+      unknown: "Unknown",
+      createdAt: "Created at",
+      notFound: "No documents found with the search criteria.",
+      sessionError: "Session error:",
+      notAuthenticated: "User not authenticated. Redirecting to login..."
+    }
+  };
+  const [currentLang, setCurrentLang] = useState("pt");
+  useEffect(() => {
+    const lang = localStorage.getItem("lang") || "pt";
+    setCurrentLang(lang);
+    const onLangChange = (e) => {
+      if (e.detail && e.detail.lang) setCurrentLang(e.detail.lang);
+    };
+    window.addEventListener("langChange", onLangChange);
+    return () => window.removeEventListener("langChange", onLangChange);
+  }, []);
+
   // 🕵️‍♂️ Efeito para verificar a sessão do utilizador ao montar o componente. ESSENCIAL para acesso protegido.
   useEffect(() => {
     const checkSession = async () => {
@@ -111,12 +143,12 @@ export default function ListaDocumentos({ documents: propDocuments, termoPesquis
 
   // 2. ❌ Estado de erro na verificação da sessão: Exibe uma mensagem de erro de sessão.
   if (sessionError) {
-    return <div className="text-center p-4 text-red-500">Erro de sessão: {sessionError}</div>; // Mensagem de erro para o utilizador
+    return <div className="text-center p-4 text-red-500">{texts[currentLang].sessionError} {sessionError}</div>;
   }
 
   // 3. 🚫 Estado de utilizador não autenticado (fallback): Caso o redirecionamento falhe ou demore, mostra uma mensagem.
   if (!user) {
-    return <div className="text-center p-4">Utilizador não autenticado. A redirecionar para o login...</div>; // Mensagem informativa
+    return <div className="text-center p-4">{texts[currentLang].notAuthenticated}</div>;
   }
 
   // 4. ⏳ Estado de carregamento inicial dos documentos pelo pai:
@@ -135,7 +167,7 @@ export default function ListaDocumentos({ documents: propDocuments, termoPesquis
   if (documentosFiltradosCliente.length === 0) {
     return (
         <div className="text-center p-4 text-gray-600 w-full max-w-4xl">
-            Nenhum documento encontrado com os critérios de pesquisa.
+            {texts[currentLang].notFound}
         </div>
     );
   }
@@ -160,10 +192,10 @@ export default function ListaDocumentos({ documents: propDocuments, termoPesquis
                       {doc.name || "Documento sem nome"}
                     </h2>
                     <p className="text-sm text-gray-600 mb-2">
-                      Autor: {doc.author || "Desconhecido"}
+                      {texts[currentLang].author}: {doc.author || texts[currentLang].unknown}
                     </p>
                     <p className="text-xs text-gray-500">
-                      Criado em: {new Date(doc.created_at).toLocaleDateString('pt-PT')}
+                      {texts[currentLang].createdAt}: {new Date(doc.created_at).toLocaleDateString(currentLang === 'pt' ? 'pt-PT' : 'en-US')}
                     </p>
                   </div>
                   {/* 👁️ Botão de Visualizar o Documento */}
@@ -172,7 +204,7 @@ export default function ListaDocumentos({ documents: propDocuments, termoPesquis
                     className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md
                               transition-colors flex-shrink-0 text-sm flex items-center gap-2"
                   >
-                    <span>📄</span> Visualizar
+                    <span>📄</span> {texts[currentLang].view}
                   </button>
                 </div>
               </div>
