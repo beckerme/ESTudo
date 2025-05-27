@@ -24,7 +24,7 @@ export default function PaginaComRedirect() {
         <div className="justify-center xl:py-2 py-4 mt-3 flex items-center min-h-screen">
             <div className="flex items-center space-x-4"> 
                 {/* Mensagem */}
-                <div className="bg-[#fff] px-6 py-10 rounded-2xl shadow-md outline outline-2 outline-gray-600 p-4 rounded">
+                <div className="bg-[#fff] px-6 py-10 rounded-2xl shadow-md outline-2 outline-gray-600 p-4">
                     <p className="lg:text-md flex justify-center">Não tem acesso a esta página</p>
                     <p className="lg:text-md">Vai ser redirecionado para a página inicial</p>
                 </div>
