@@ -5,11 +5,24 @@ import supabase from "@/app/config/supabaseClient"; // Ajuste o caminho conforme
 export default function Notificacao({ isOpen, setIsOpen }) {
   const [notificacoes, setNotificacoes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [currentLang, setCurrentLang] = useState("pt");
 
   const ESTADOS = {
     nao_lida : "7d18d158-79f4-4c2f-9083-e93605028ebc",
     lida : "9c381f61-d2f2-48af-ae2a-2a4799414a54",
     eliminada : "f834d0de-218d-4822-a805-b0c500456cf9",
+  };
+
+  // Textos multilíngues
+  const texts = {
+    pt: {
+      notifications: "Notificações",
+      noNotifications: "Sem notificações."
+    },
+    en: {
+      notifications: "Notifications",
+      noNotifications: "No notifications."
+    }
   };
 
   // Carregar notificações quando o componente for aberto
@@ -73,6 +86,16 @@ const carregarNotificacoes = async () => {
     }
   };
 
+  useEffect(() => {
+    const lang = localStorage.getItem("lang") || "pt";
+    setCurrentLang(lang);
+    const onLangChange = (e) => {
+      if (e.detail && e.detail.lang) setCurrentLang(e.detail.lang);
+    };
+    window.addEventListener("langChange", onLangChange);
+    return () => window.removeEventListener("langChange", onLangChange);
+  }, []);
+
   return (
     <div
       className={`fixed top-0 right-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 ${
@@ -80,7 +103,7 @@ const carregarNotificacoes = async () => {
       }`}
     >
       <div className="flex items-center justify-between px-4 py-4 border-b">
-        <h2 className="text-lg font-semibold">Notificações</h2>
+        <h2 className="text-lg font-semibold">{texts[currentLang].notifications}</h2>
         <button onClick={() => setIsOpen(false)}>
           <X size={24} />
         </button>
@@ -102,7 +125,7 @@ const carregarNotificacoes = async () => {
             </div>
           ))
         ) : (
-          <p className="text-gray-500">Sem notificações.</p>
+          <p className="text-gray-500">{texts[currentLang].noNotifications}</p>
         )}
       </div>
     </div>

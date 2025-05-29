@@ -10,31 +10,59 @@ import HeaderInicioAdmin from "@/components/HeaderInicioAdmin";   // ⬆️ Cabe
 
 // 🏡 Componente principal da página (Homepage/Página Inicial)
 export default function App() {
-    const router = useRouter();                                     // 🚀 Hook para permitir navegação no Next.js
-    const [autorizado, setAutorizado] = useState(null); 
-    const [tipoUtilizador, setTipoUtilizador] = useState(null);
+  const router = useRouter();
+  const [autorizado, setAutorizado] = useState(null);
+  const [tipoUtilizador, setTipoUtilizador] = useState(null);
+  const [currentLang, setCurrentLang] = useState("pt");
 
+  // Textos multilíngues para a página inicial
+  const texts = {
+    pt: {
+      appTitle: "ESTudo",
+      appSubtitle: "Aplicação Universitária de Partilha de Documentos",
+      search: "Realizar\nPesquisa",
+      submit: "Submeter\nDocumentos",
+      validate: "Validar\nDocumentos",
+      approve: "Aprovar\nRegistos",
+      stats: "Visualizar\nEstatísticas",
+      deleteAccount: "Apagar\nConta"
+    },
+    en: {
+      appTitle: "ESTudo",
+      appSubtitle: "University Document-Sharing App",
+      search: "Perform\nSearch",
+      submit: "Submit\nDocuments",
+      validate: "Validate\nDocuments",
+      approve: "Approve\nRegistrations",
+      stats: "View\nStatistics",
+      deleteAccount: "Delete\nAccount"
+    }
+  };
 
-    // 🕵️‍♂️ Efeito para carregar o tipo de utilizador do localStorage e procurar as tags na montagem
-    useEffect(() => {
-        const tipo = localStorage.getItem("tipoUsuario");
+  useEffect(() => {
+    const lang = localStorage.getItem("lang") || "pt";
+    setCurrentLang(lang);
+    // Atualização imediata ao trocar a bandeira (escuta evento customizado)
+    const onLangChange = (e) => {
+      if (e.detail && e.detail.lang) setCurrentLang(e.detail.lang);
+    };
+    window.addEventListener("langChange", onLangChange);
+    return () => window.removeEventListener("langChange", onLangChange);
+  }, []);
 
-        if (tipo === "user_inativo" || tipo === 'user_nao_validado') {
-          setAutorizado(false);
-          router.push("/mensagem-erro");
-        } else {
-          setAutorizado(true);
-          setTipoUtilizador(tipo);
-        }
-      }, [router]);
+  useEffect(() => {
+    const tipo = localStorage.getItem("tipoUsuario");
+    if (tipo === "user_inativo" || tipo === 'user_nao_validado') {
+      setAutorizado(false);
+      router.push("/mensagem-erro");
+    } else {
+      setAutorizado(true);
+      setTipoUtilizador(tipo);
+    }
+  }, [router]);
 
-      if (autorizado === null) {
-        return null; 
-      }
-
-      if (!autorizado) {
-        return null; 
-      }
+  if (autorizado === null) return null;
+  if (!autorizado) return null; 
 
   // 🏗️ Estrutura de renderização da página inicial
   return (
@@ -50,8 +78,8 @@ export default function App() {
       <div className="flex flex-col items-center w-full px-4 py-6 my-auto">
         {/* 📄 Títulos principais da página */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">ESTudo</h1> 
-          <p className="text-lg text-gray-700 mt-2">University Document-Sharing App</p>
+          <h1 className="text-3xl font-bold text-gray-900">{texts[currentLang].appTitle}</h1> 
+          <p className="text-lg text-gray-700 mt-2">{texts[currentLang].appSubtitle}</p>
         </div>
 
         {/* 🔘 Botões de ação principais */}
@@ -64,8 +92,8 @@ export default function App() {
                 className="flex flex-col items-center justify-center w-70 h-40 bg-gray-300 hover:bg-gray-400 rounded-lg transition-colors duration-200"
               >
                 <div className="text-4xl mb-2">🔍</div>
-                <span className="text-gray-800 font-medium text-center">
-                  Realizar<br />Pesquisa
+                <span className="text-gray-800 font-medium text-center" style={{whiteSpace: 'pre-line'}}>
+                  {texts[currentLang].search}
                 </span>
               </button>
 
@@ -75,8 +103,8 @@ export default function App() {
                 className="flex flex-col items-center justify-center w-70 h-40 bg-gray-300 hover:bg-gray-400 rounded-lg transition-colors duration-200"
               >
                 <div className="text-4xl mb-2">📤</div>
-                <span className="text-gray-800 font-medium text-center">
-                  Submeter<br />Documentos
+                <span className="text-gray-800 font-medium text-center" style={{whiteSpace: 'pre-line'}}>
+                  {texts[currentLang].submit}
                 </span>
               </button>
             </>
@@ -90,8 +118,8 @@ export default function App() {
                 className="flex flex-col items-center justify-center w-70 h-40 bg-gray-300 hover:bg-gray-400 rounded-lg transition-colors duration-200"
               >
                 <div className="text-4xl mb-2">✅</div>
-                <span className="text-gray-800 font-medium text-center">
-                  Validar<br />Documentos
+                <span className="text-gray-800 font-medium text-center" style={{whiteSpace: 'pre-line'}}>
+                  {texts[currentLang].validate}
                 </span>
               </button>
 
@@ -101,8 +129,8 @@ export default function App() {
                 className="flex flex-col items-center justify-center w-70 h-40 bg-gray-300 hover:bg-gray-400 rounded-lg transition-colors duration-200"
               >
                 <div className="text-4xl mb-2">🔍</div>
-                <span className="text-gray-800 font-medium text-center">
-                  Realizar<br />Pesquisa
+                <span className="text-gray-800 font-medium text-center" style={{whiteSpace: 'pre-line'}}>
+                  {texts[currentLang].search}
                 </span>
               </button>
             </>
@@ -116,8 +144,8 @@ export default function App() {
                 className="flex flex-col items-center justify-center w-70 h-40 bg-gray-300 hover:bg-gray-400 rounded-lg transition-colors duration-200"
               >
                 <div className="text-4xl mb-2">👤</div>
-                <span className="text-gray-800 font-medium text-center">
-                  Aprovar<br />Registos
+                <span className="text-gray-800 font-medium text-center" style={{whiteSpace: 'pre-line'}}>
+                  {texts[currentLang].approve}
                 </span>
               </button>
 
@@ -127,8 +155,8 @@ export default function App() {
                 className="flex flex-col items-center justify-center w-70 h-40 bg-gray-300 hover:bg-gray-400 rounded-lg transition-colors duration-200"
               >
                 <div className="text-4xl mb-2">📊</div>
-                <span className="text-gray-800 font-medium text-center">
-                  Visualizar<br />Estatísticas
+                <span className="text-gray-800 font-medium text-center" style={{whiteSpace: 'pre-line'}}>
+                  {texts[currentLang].stats}
                 </span>
               </button>
 
@@ -138,8 +166,8 @@ export default function App() {
                 className="flex flex-col items-center justify-center w-70 h-40 bg-gray-300 hover:bg-gray-400 rounded-lg transition-colors duration-200"
               >
                 <div className="text-4xl mb-2">🗑️</div>
-                <span className="text-gray-800 font-medium text-center">
-                  Apagar<br />Conta
+                <span className="text-gray-800 font-medium text-center" style={{whiteSpace: 'pre-line'}}>
+                  {texts[currentLang].deleteAccount}
                 </span>
               </button>
             </>

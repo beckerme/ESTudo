@@ -3,7 +3,7 @@
 // 🏷️ Componente Tags: Exibe botões clicáveis para filtrar documentos por tags.
 // Recebe a lista de tags, uma função para lidar com a mudança de tag selecionada,
 // e o ID da tag que está atualmente ativa.
-export default function Tags({ tags, onTagChange, activeTagId }) {
+export default function Tags({ tags, onTagChange, activeTagId, allCategoriesLabel = "Todas as Categorias" }) {
 
     // 🖱️ Função que lida com o clique em um botão de tag
     const handleTagClick = (tagId) => {
@@ -36,7 +36,7 @@ export default function Tags({ tags, onTagChange, activeTagId }) {
           `}
           onClick={() => handleTagClick('')}                                      // 🖱️ Chama handleTagClick com string vazia para limpar o filtro
         >
-          Todas as Categorias
+          {allCategoriesLabel}
         </button>
 
         {/* 🗺️ Mapeia o array de 'tags' recebido via props para criar um botão para cada tag */}
