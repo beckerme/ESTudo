@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import supabase from "@/app/config/supabaseClient";
 import Header from "../HeaderInicioAdmin";
 import { PieChart, Pie, Tooltip, Cell, Legend } from "recharts";
+import * as XLSX from "xlsx";
 
 const kanit = Kanit({ subsets: ["latin"], weight: "400" });
 
@@ -66,6 +67,118 @@ export default function AdminDashboard() {
     }
   };
 
+  const exportToExcel = () => {
+    try {
+      // Criar um novo workbook
+      const workbook = XLSX.utils.book_new();
+
+      // Folha 1: Lista de Utilizadores (exatamente como na tabela da imagem)
+      const usersData = [
+        ["Lista de Utilizadores", "", ""],
+        ["", "", ""],
+        ["Nome", "Email", "Tipo"]
+      ];
+
+      // Adicionar dados dos utilizadores exatamente como aparecem na tabela
+      users.forEach(user => {
+        usersData.push([
+          user.nome || "",
+          user.email || "",
+          user.tipo_user?.tipo_user || ""
+        ]);
+      });
+
+      // Se não houver utilizadores
+      if (users.length === 0) {
+        usersData.push(["Nenhum utilizador encontrado", "", ""]);
+      }
+
+      const usersSheet = XLSX.utils.aoa_to_sheet(usersData);
+      
+      // Definir largura das colunas para melhor visualização
+      usersSheet['!cols'] = [
+        { width: 15 }, // Nome
+        { width: 25 }, // Email
+        { width: 15 }  // Tipo
+      ];
+      
+      XLSX.utils.book_append_sheet(workbook, usersSheet, "Lista de Utilizadores");
+
+      // Folha 2: Distribuição de Documentos por Tag (dados do gráfico)
+      const docsData = [
+        ["Distribuição de Documentos por Tag", ""],
+        ["", ""],
+        ["Nome da Tag", "Número de Documentos"]
+      ];
+
+      // Adicionar dados das tags exatamente como no gráfico
+      docsByTag.forEach(item => {
+        docsData.push([
+          item.tag,
+          item.count
+        ]);
+      });
+
+      // Se não houver dados de tags
+      if (docsByTag.length === 0) {
+        docsData.push(["Nenhum documento encontrado", "0"]);
+      }
+
+      // Adicionar linha de total
+      if (docsByTag.length > 0) {
+        docsData.push(["", ""]);
+        docsData.push(["TOTAL", numDocs]);
+      }
+
+      const docsSheet = XLSX.utils.aoa_to_sheet(docsData);
+      
+      // Definir largura das colunas
+      docsSheet['!cols'] = [
+        { width: 25 }, // Nome da Tag
+        { width: 20 }  // Número de Documentos
+      ];
+      
+      XLSX.utils.book_append_sheet(workbook, docsSheet, "Documentos por Tag");
+
+      // Folha 3: Resumo Geral com métricas principais
+      const summaryData = [
+        ["Nº de Documentos", "Nº de Utilizadores"],
+        [numDocs, numUsers],
+        ["", ""],
+        ["Informações de Exportação", ""],
+        ["Data de Exportação:", new Date().toLocaleDateString("pt-PT")],
+        ["Hora de Exportação:", new Date().toLocaleTimeString("pt-PT")],
+        ["", ""],
+        ["Estatísticas Detalhadas", ""],
+        ["Número Total de Documentos", numDocs],
+        ["Número Total de Utilizadores", numUsers],
+        ["Número de Tags Diferentes", docsByTag.length]
+      ];
+      
+      const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+      
+      // Definir largura das colunas
+      summarySheet['!cols'] = [
+        { width: 30 },
+        { width: 15 }
+      ];
+      
+      XLSX.utils.book_append_sheet(workbook, summarySheet, "Resumo");
+
+      // Gerar o arquivo e fazer download
+      const timestamp = new Date().toISOString().split('T')[0];
+      const fileName = `Relatorio_Admin_${timestamp}.xlsx`;
+      XLSX.writeFile(workbook, fileName);
+      
+      // Mostrar mensagem de sucesso
+      alert(`Dados exportados com sucesso!\n\nArquivo: ${fileName}\n\nConteúdo exportado:\n• ${users.length} utilizadores\n• ${docsByTag.length} tags de documentos\n• ${numDocs} documentos totais`);
+      
+    } catch (error) {
+      console.error("Erro ao exportar para Excel:", error);
+      alert("Erro ao exportar dados. Verifique os dados e tente novamente.");
+    }
+  };
+
   useEffect(() => {
     fetchCountsAndUsers();
   }, []);
@@ -79,6 +192,28 @@ export default function AdminDashboard() {
       <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
         <div className="w-full max-w-5xl bg-white p-6 rounded-xl shadow-lg space-y-6">
           <h1 className="text-2xl font-bold text-blue-900">Painel de Administração</h1>
+
+          {/* Botão de Exportação */}
+            <button
+              onClick={exportToExcel}
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md transition-colors duration-200 flex items-center gap-2"
+              title="Exportar dados para Excel"
+            >
+              <svg 
+                className="w-5 h-5" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" 
+                />
+              </svg>
+              Exportar Dados
+            </button>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="bg-blue-100 text-blue-900 p-4 rounded-lg shadow">
