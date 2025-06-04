@@ -1,11 +1,14 @@
 "use client";
 
 import { Kanit } from "next/font/google";
-import Header from "../HeaderInicioAluno";
+import Header from "../HeaderInicioMod";
 import { useState, useEffect } from "react";
 import { Search, XCircle, CheckCircle } from "lucide-react";
 import supabase from "@/app/config/supabaseClient";
 import { useRouter } from "next/navigation";
+
+
+
 
 const kanit = Kanit({ subsets: ["latin"], weight: "400" });
 
