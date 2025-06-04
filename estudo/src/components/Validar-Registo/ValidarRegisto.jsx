@@ -18,7 +18,7 @@ export default function ValidarRegisto() {
   const [users, setUsers] = useState([]);
   const [cursos, setCursos] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [currentLang, setCurrentLang] = useState("pt");
+  const [currentLang, setCurrentLang] = useState(() => typeof window !== "undefined" ? localStorage.getItem("lang") || "pt" : "pt");
 
   // Textos multilíngues
   const texts = {
@@ -241,32 +241,29 @@ export default function ValidarRegisto() {
   return (
     <>
       <Toaster position="top-right" />
-
       <div>
         <Header />
       </div>
-
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="w-full max-w-4xl p-6">
           <div className="relative mb-4">
             <input
               type="text"
-              placeholder="Pesquisa"
+              placeholder={texts[currentLang].searchPlaceholder}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full p-3 pl-4 bg-[#007CC2] rounded-3xl text-white placeholder-white focus:outline-none"
             />
             <Search className="absolute right-3 top-3 text-white" />
           </div>
-
           <div className="flex flex-col items-center w-full">
             <div className="space-y-4 w-full max-w-4xl">
               {filteredUsers.length === 0 ? (
                 <div className="text-center p-4 text-gray-600 w-full">
                   {users.length === 0 ? (
-                    "Não existem registos pendentes de validação."
+                    texts[currentLang].noPending
                   ) : (
-                    "Nenhum utilizador encontrado."
+                    currentLang === "pt" ? "Nenhum utilizador encontrado." : "No user found."
                   )}
                 </div>
               ) : (
@@ -293,13 +290,13 @@ export default function ValidarRegisto() {
                           </p>
                         </div>
                       </div>
-
                       {/* Action buttons */}
                       <div className="flex gap-2 flex-shrink-0">
                           <>
                             <XCircle
                               className="text-red-500 cursor-pointer"
                               size={24}
+                              title={texts[currentLang].reject}
                               onClick={() =>
                                 handleDeactivateUser(user.id_user, user.nome)
                               }
@@ -307,6 +304,7 @@ export default function ValidarRegisto() {
                             <CheckCircle
                               className="text-green-500 cursor-pointer"
                               size={24}
+                              title={texts[currentLang].validate}
                               onClick={() =>
                                 handleValidateUser(
                                   user.id_user,

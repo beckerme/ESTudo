@@ -17,12 +17,7 @@ export default function ValidarDocumento() {
   const [showModal, setShowModal] = useState(false);
   const [selectedDocId, setSelectedDocId] = useState(null);
   const [selectedTagId, setSelectedTagId] = useState(null);
-  const [currentLang, setCurrentLang] = useState(
-    () =>
-      typeof window !== "undefined"
-        ? localStorage.getItem("lang") || "pt"
-        : "pt"
-  );
+  const [currentLang, setCurrentLang] = useState(() => typeof window !== "undefined" ? localStorage.getItem("lang") || "pt" : "pt");
 
   const ESTADOS = {
     por_aprovar: 1,
@@ -236,7 +231,6 @@ export default function ValidarDocumento() {
       <div>
         <Header />
       </div>
-
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="w-full max-w-4xl p-6">
           <div className="relative mb-4">
@@ -249,7 +243,6 @@ export default function ValidarDocumento() {
             />
             <Search className="absolute right-3 top-3 text-white" />
           </div>
-
           <div className="flex flex-col items-center w-full">
             <div className="space-y-4 w-full max-w-4xl">
               {filteredDocuments.length === 0 ? (
@@ -278,21 +271,20 @@ export default function ValidarDocumento() {
                           {getEstadoLabel(doc.estado)}
                         </p>
                       </div>
-
                       {/* Botões de ação */}
                       <div className="flex gap-2 flex-shrink-0">
                         <button
                           onClick={() => openTagEditor(doc)}
                           className="bg-yellow-400 hover:bg-yellow-500 text-black px-3 py-1 rounded-md text-sm font-medium"
                         >
-                          Editar Tags
+                          {texts[currentLang].editTags}
                         </button>
-
                         {doc.estado === ESTADOS.por_aprovar && (
                           <>
                             <XCircle
                               className="text-red-500 cursor-pointer"
                               size={24}
+                              title={texts[currentLang].reject}
                               onClick={() =>
                                 updateEstado(doc.id, ESTADOS.nao_aprovado)
                               }
@@ -300,6 +292,7 @@ export default function ValidarDocumento() {
                             <CheckCircle
                               className="text-green-500 cursor-pointer"
                               size={24}
+                              title={texts[currentLang].approve}
                               onClick={() =>
                                 updateEstado(doc.id, ESTADOS.publicado)
                               }
@@ -315,7 +308,6 @@ export default function ValidarDocumento() {
           </div>
         </div>
       </div>
-
       {/* Modal para selecionar tag única */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
