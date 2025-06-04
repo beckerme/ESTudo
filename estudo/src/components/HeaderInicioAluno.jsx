@@ -43,7 +43,7 @@ export default function HeaderInicio() {
 
   const handleLogout = () => {
     setIsLogoutModalOpen(false);
-    window.location.href = "/login"; // Ou use router.push se preferir
+    window.location.href = "/"; // Ou use router.push se preferir
   };
 
   const toggleLang = (lang) => {

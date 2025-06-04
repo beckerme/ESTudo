@@ -14,7 +14,7 @@ export default function HeaderInicioAdmin() {
 
   const handleLogout = () => {
     setIsLogoutPopUpOpen(false);
-    router.push("/login");
+    router.push("/");
   };
 
   const toggleLang = (lang) => {

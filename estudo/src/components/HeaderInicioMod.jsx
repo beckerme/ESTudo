@@ -12,7 +12,7 @@ export default function HeaderInicioMod() {
   const handleLogout = () => {
     setIsLogoutModalOpen(false);
     // Redirecionar para login (aqui é só um exemplo, ajuste conforme necessário)
-    window.location.href = "/login";
+    window.location.href = "/";
   };
 
   const toggleLang = (lang) => {

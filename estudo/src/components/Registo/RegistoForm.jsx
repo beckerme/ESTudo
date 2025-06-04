@@ -190,7 +190,7 @@ export default function RegistoForm({ currentLang = "pt" }) {
     await notifyAllAdmins(adminNotificationMessage);
 
     setErro(null);
-    router.push("/login");
+    router.push("/");
   };
 
   // Textos multilíngues
@@ -292,7 +292,7 @@ export default function RegistoForm({ currentLang = "pt" }) {
         </button>
         <p className="text-center mt-8">
           {texts[currentLang].alreadyAccount} {" "}
-          <Link href="/login" className="text-blue-600 underline">
+          <Link href="/" className="text-blue-600 underline">
             {texts[currentLang].loginHere}
           </Link>
         </p>

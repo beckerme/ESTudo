@@ -66,7 +66,7 @@ export default function ListaDocumentos({ documents: propDocuments, termoPesquis
 
         // Se não houver sessão ou utilizador na sessão, redireciona 🚪
         if (!session || !session.user) {
-          router.push('/login');                                    // ➡️ Redireciona o utilizador para a página de login
+          router.push('/');                                    // ➡️ Redireciona o utilizador para a página de login
           // Nota: Não precisa definir sessionLoading(false) aqui, pois o router.push interrompe a execução.
           return; // Sai da função checkSession
         }
