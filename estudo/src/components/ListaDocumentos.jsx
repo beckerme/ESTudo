@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";                        // 🚀 Hook
 // Componente que lista documentos recebidos via props e aplica filtragem adicional por termo de pesquisa.
 // Exibe mensagens de estado diferentes dependendo se está a carregar, se não encontrou documentos
 // após a filtragem, ou se há documentos para mostrar.
+// 🔥 IMPORTANTE: Agora apenas exibe documentos com estado == 2
 export default function ListaDocumentos({ documents: propDocuments, termoPesquisa = "" }) {
   
   // 🔐 Estados para gerenciar a sessão do utilizador
@@ -91,7 +92,7 @@ export default function ListaDocumentos({ documents: propDocuments, termoPesquis
       // Só define hasLoadedInitially para true SE propDocuments deixar de ser null/undefined
       // E AINDA NÃO TIVER SIDO DEFINIDO (para correr apenas na primeira carga de dados).
       if (propDocuments !== null && typeof propDocuments !== 'undefined' && !hasLoadedInitially) {
-          setHasLoadedInitially(true);                              // Marca que a carga inicial de documentos (pelo pai) aconteceu ✅
+          setHasLoadedInitially(true);
       }
       // Dependências: propDocuments para reagir quando o pai passar os dados,
       // hasLoadedInitially para garantir que só marca como "carregado inicialmente" uma vez.
@@ -120,7 +121,13 @@ export default function ListaDocumentos({ documents: propDocuments, termoPesquis
   };
 
   // 🔍 Filtra os documentos recebidos via prop 'propDocuments' com base no 'termoPesquisa' (case-insensitive) no nome ou autor.
+  // 🔥 FILTRO ADICIONAL: Garante novamente que apenas documentos com estado == 2 são exibidos (dupla proteção)
   const documentosFiltradosCliente = (propDocuments || []).filter((doc) => {
+    
+    // 🔥 PRIMEIRO FILTRO: Apenas documentos com estado == 2
+    if (doc.estado !== 2) {
+      return false;
+    }
     
     // Converte o termo de pesquisa para minúsculas, se existir
     // Se não, todos os documentos são incluídos
@@ -164,6 +171,7 @@ export default function ListaDocumentos({ documents: propDocuments, termoPesquis
   //    - Os dados do pai vieram vazios (`propDocuments` era `[]`).
   //    - OU os dados do pai vieram com itens, mas nenhum deles correspondeu ao `termoPesquisa`
   //      durante a filtragem feita NESTE componente.
+  //    - OU nenhum documento tinha estado == 2 (nova condição)
   if (documentosFiltradosCliente.length === 0) {
     return (
         <div className="text-center p-4 text-gray-600 w-full max-w-4xl">
@@ -173,7 +181,7 @@ export default function ListaDocumentos({ documents: propDocuments, termoPesquis
   }
 
   // 6. ✅ Estado final: Há documentos na lista FILTRADA localmente para exibir.
-  //    Renderiza a lista de documentos filtrados.
+  //    Renderiza a lista de documentos filtrados (apenas com estado == 2).
   return (
     <div className="flex flex-col items-center w-full">
         <div className="space-y-4 w-full max-w-3xl px-4 md:px-0">

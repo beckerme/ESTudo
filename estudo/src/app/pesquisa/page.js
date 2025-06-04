@@ -112,13 +112,18 @@ export default function App() {
     setIsLoadingDocs(true);
     setError(null);
     try {
-      let query = supabase.from('user_documents').select('*');
+      let query = supabase
+        .from('user_documents')
+        .select('*')
+        .eq('estado', 2);
+      
       if (debouncedTermoPesquisa.trim()) {
         query = query.ilike('name', `%${debouncedTermoPesquisa.trim()}%`);
       }
       if (selectedTagId) {
         query = query.eq('tag_id', selectedTagId);
       }
+      
       const { data, error } = await query;
       if (error) {
         console.error("Erro no Supabase:", error);
