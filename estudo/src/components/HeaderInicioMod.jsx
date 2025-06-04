@@ -6,8 +6,25 @@ export default function HeaderInicioMod() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isProfileSidebarOpen, setIsProfileSidebarOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState("pt");
-  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const [currentLang, setCurrentLang] = useState(() => typeof window !== "undefined" ? localStorage.getItem("lang") || "pt" : "pt");
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false); // Estado para o seletor de idioma
+  // Textos multilíngues para o menu lateral
+  const texts = {
+    pt: {
+      profileMenu: "Menu do Perfil",
+      approveNotes: "Aprovar Apontamentos",
+      logout: "Sair",
+      confirmLogout: "Tem a certeza que deseja sair?",
+      cancel: "Cancelar"
+    },
+    en: {
+      profileMenu: "Profile Menu",
+      approveNotes: "Approve Notes",
+      logout: "Logout",
+      confirmLogout: "Are you sure you want to logout?",
+      cancel: "Cancel"
+    }
+  };
 
   const handleLogout = () => {
     setIsLogoutModalOpen(false);
@@ -18,7 +35,8 @@ export default function HeaderInicioMod() {
   const toggleLang = (lang) => {
     setCurrentLang(lang);
     setIsLangDropdownOpen(false);
-    // Aqui você pode adicionar lógica para trocar o idioma global do site
+    localStorage.setItem("lang", lang);
+    window.dispatchEvent(new CustomEvent("langChange", { detail: { lang } }));
   };
 
   return (
@@ -119,14 +137,14 @@ export default function HeaderInicioMod() {
             alt="foto do utilizador"
             className="rounded-full mb-6"
           />
-          <h2 className="text-xl font-bold mb-6">Menu do Perfil</h2>
+          <h2 className="text-xl font-bold mb-6">{texts[currentLang].profileMenu}</h2>
           <ul className="space-y-4 text-center">
             <li>
               <a
                 href="validar-documento"
                 className={`hover:underline ${isLogoutModalOpen ? "pointer-events-none opacity-50" : ""}`}
               >
-                Aprovar Apontamentos
+                {texts[currentLang].approveNotes}
               </a>
             </li>
             <li>
@@ -135,7 +153,7 @@ export default function HeaderInicioMod() {
                 className={`hover:underline text-red-600 ${isLogoutModalOpen ? "pointer-events-none opacity-50" : ""}`}
                 disabled={isLogoutModalOpen}
               >
-                Sair
+                {texts[currentLang].logout}
               </button>
             </li>
           </ul>
@@ -162,19 +180,19 @@ export default function HeaderInicioMod() {
           {/* Conteúdo do PopUp */}
           <div className="fixed inset-0 z-70 flex items-center justify-center pointer-events-none">
             <div className="relative z-70 bg-white rounded-xl shadow-lg p-8 w-[90%] max-w-md text-center pointer-events-auto">
-              <h3 className="text-xl font-semibold mb-4">Tem a certeza que deseja sair?</h3>
+              <h3 className="text-xl font-semibold mb-4">{texts[currentLang].confirmLogout}</h3>
               <div className="flex justify-center gap-4 mt-6">
                 <button
                   className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
                   onClick={() => setIsLogoutModalOpen(false)}
                 >
-                  Cancelar
+                  {texts[currentLang].cancel}
                 </button>
                 <button
                   className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
                   onClick={handleLogout}
                 >
-                  Sair
+                  {texts[currentLang].logout}
                 </button>
               </div>
             </div>

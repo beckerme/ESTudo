@@ -7,9 +7,6 @@ import { Search, XCircle, CheckCircle } from "lucide-react";
 import supabase from "@/app/config/supabaseClient";
 import { useRouter } from "next/navigation";
 
-
-
-
 const kanit = Kanit({ subsets: ["latin"], weight: "400" });
 
 export default function ValidarDocumento() {
@@ -19,11 +16,49 @@ export default function ValidarDocumento() {
   const [showModal, setShowModal] = useState(false);
   const [selectedDocId, setSelectedDocId] = useState(null);
   const [selectedTagId, setSelectedTagId] = useState(null);
+  const [currentLang, setCurrentLang] = useState(
+    () =>
+      typeof window !== "undefined"
+        ? localStorage.getItem("lang") || "pt"
+        : "pt"
+  );
 
   const ESTADOS = {
     por_aprovar: 1,
     publicado: 2,
     nao_aprovado: 3,
+  };
+
+  // Textos multilíngues
+  const texts = {
+    pt: {
+      searchPlaceholder: "Pesquisa",
+      state: "Estado:",
+      toApprove: "Por Aprovar",
+      published: "Publicado",
+      unknown: "Desconhecido",
+      editTags: "Editar Tags",
+      reject: "Rejeitar",
+      approve: "Aprovar",
+      selectTag: "Selecionar Tag",
+      selectTagPlaceholder: "Selecione uma tag",
+      cancel: "Cancelar",
+      save: "Guardar",
+    },
+    en: {
+      searchPlaceholder: "Search",
+      state: "State:",
+      toApprove: "To Approve",
+      published: "Published",
+      unknown: "Unknown",
+      editTags: "Edit Tags",
+      reject: "Reject",
+      approve: "Approve",
+      selectTag: "Select Tag",
+      selectTagPlaceholder: "Select a tag",
+      cancel: "Cancel",
+      save: "Save",
+    },
   };
 
   const fetchDocuments = async () => {
@@ -93,11 +128,11 @@ export default function ValidarDocumento() {
   const getEstadoLabel = (estado) => {
     switch (estado) {
       case ESTADOS.por_aprovar:
-        return "Por Aprovar";
+        return texts[currentLang].toApprove;
       case ESTADOS.publicado:
-        return "Publicado";
+        return texts[currentLang].published;
       default:
-        return "Desconhecido";
+        return texts[currentLang].unknown;
     }
   };
 
@@ -143,7 +178,7 @@ export default function ValidarDocumento() {
         created_at: new Date().toISOString(),
         id_tipo_notificacao: tipoData?.id_tipo_notificacao,
         id_estado: estadoData?.id_estado,
-        mensagem: message
+        mensagem: message,
       });
 
       // Verificar se todos os dados necessários existem
@@ -179,6 +214,16 @@ export default function ValidarDocumento() {
     fetchDocuments();
   }, []);
 
+  useEffect(() => {
+    const lang = localStorage.getItem("lang") || "pt";
+    setCurrentLang(lang);
+    const onLangChange = (e) => {
+      if (e.detail && e.detail.lang) setCurrentLang(e.detail.lang);
+    };
+    window.addEventListener("langChange", onLangChange);
+    return () => window.removeEventListener("langChange", onLangChange);
+  }, []);
+
   return (
     <>
       <div>
@@ -190,7 +235,7 @@ export default function ValidarDocumento() {
           <div className="relative mb-4">
             <input
               type="text"
-              placeholder="Pesquisa"
+              placeholder={texts[currentLang].searchPlaceholder}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full p-3 pl-4 rounded-lg bg-green-500 text-white placeholder-white focus:outline-none"
@@ -214,7 +259,7 @@ export default function ValidarDocumento() {
                       <h3 className="text-white font-bold">{doc.name}</h3>
                       <p className="text-gray-300 text-sm">{doc.author}</p>
                       <p className="text-gray-400 text-xs">
-                        Estado: {getEstadoLabel(doc.estado)}
+                        {texts[currentLang].state} {getEstadoLabel(doc.estado)}
                       </p>
                     </div>
                   </div>
@@ -224,7 +269,7 @@ export default function ValidarDocumento() {
                       onClick={() => openTagEditor(doc)}
                       className="bg-yellow-400 hover:bg-yellow-500 text-black px-3 py-1 rounded-md text-sm font-medium"
                     >
-                      Editar Tags
+                      {texts[currentLang].editTags}
                     </button>
 
                     {doc.estado === ESTADOS.por_aprovar && (
@@ -232,6 +277,7 @@ export default function ValidarDocumento() {
                         <XCircle
                           className="text-red-500 cursor-pointer"
                           size={24}
+                          title={texts[currentLang].reject}
                           onClick={() =>
                             updateEstado(doc.id, ESTADOS.nao_aprovado)
                           }
@@ -239,6 +285,7 @@ export default function ValidarDocumento() {
                         <CheckCircle
                           className="text-green-500 cursor-pointer"
                           size={24}
+                          title={texts[currentLang].approve}
                           onClick={() =>
                             updateEstado(doc.id, ESTADOS.publicado)
                           }
@@ -256,14 +303,14 @@ export default function ValidarDocumento() {
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md space-y-4">
-            <h2 className="text-xl font-bold mb-2">Selecionar Tag</h2>
+            <h2 className="text-xl font-bold mb-2">{texts[currentLang].selectTag}</h2>
             <select
               value={selectedTagId || ""}
               onChange={(e) => setSelectedTagId(Number(e.target.value))}
               className="w-full p-2 border border-gray-300 rounded"
             >
               <option value="" disabled>
-                Selecione uma tag
+                {texts[currentLang].selectTagPlaceholder}
               </option>
               {tags.map((tag) => (
                 <option key={tag.id} value={tag.id}>
@@ -276,13 +323,13 @@ export default function ValidarDocumento() {
                 className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded"
                 onClick={() => setShowModal(false)}
               >
-                Cancelar
+                {texts[currentLang].cancel}
               </button>
               <button
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
                 onClick={updateTagId}
               >
-                Guardar
+                {texts[currentLang].save}
               </button>
             </div>
           </div>

@@ -96,6 +96,48 @@ const carregarNotificacoes = async () => {
     return () => window.removeEventListener("langChange", onLangChange);
   }, []);
 
+  // Função para traduzir mensagens conhecidas
+  function traduzirMensagem(mensagem, lang) {
+    // Traduções conhecidas (adicione mais conforme necessário)
+    const traducoes = [
+      {
+        pt: /^O seu documento "(.+)" foi aprovado e publicado com sucesso\.?$/,
+        en: (match) => `Your document "${match[1]}" was approved and published successfully.`
+      },
+      {
+        pt: /^O seu registo foi validado com sucesso ?\.?$/,
+        en: () => `Your registration was successfully validated.`
+      },
+      {
+        pt: /^Utilizador (.+) validado e notificado com sucesso!?$/,
+        en: (match) => `User ${match[1]} validated and notified successfully!`
+      },
+      {
+        pt: /^Utilizador (.+) desativado com sucesso!?$/,
+        en: (match) => `User ${match[1]} deactivated successfully!`
+      },
+      {
+        pt: /^Utilizador "(.+)" foi desativado\.?$/,
+        en: (match) => `User "${match[1]}" has been deactivated.`
+      },
+      {
+        pt: /^Dados exportados com sucesso!\n\nArquivo: (.+)\n\nConteúdo exportado:\n• (\d+) utilizadores\n• (\d+) tags de documentos\n• (\d+) documentos totais$/,
+        en: (match) => `Data exported successfully!\n\nFile: ${match[1]}\n\nExported content:\n• ${match[2]} users\n• ${match[3]} document tags\n• ${match[4]} total documents`
+      },
+      // Adicione mais padrões conforme necessário
+    ];
+    for (const t of traducoes) {
+      if (lang === "en" && t.pt) {
+        const match = mensagem.match(t.pt);
+        if (match) return t.en(match);
+      }
+      if (lang === "pt" && t.en) {
+        // Se quiser traduzir de volta para pt, adicione aqui
+      }
+    }
+    return mensagem; // Se não encontrar tradução, retorna original
+  }
+
   return (
     <div
       className={`fixed top-0 right-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 ${
@@ -118,7 +160,7 @@ const carregarNotificacoes = async () => {
               key={notif.id_notification}
               className="bg-gray-100 rounded-lg p-3 shadow-sm hover:bg-gray-200 transition flex justify-between items-start"
             >
-              <span>{notif.mensagem}</span>
+              <span>{traduzirMensagem(notif.mensagem, currentLang)}</span>
               <button onClick={() => eliminarNotificacao(notif.id_notification)} className="text-red-500">
                 <Trash2 size={16} />
               </button>

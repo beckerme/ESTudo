@@ -16,6 +16,58 @@ const kanit = Kanit({
 });
 
 export default function ConsultarDocumento() {
+    // Traduções multilíngues
+    const texts = {
+        pt: {
+            author: "Autor:",
+            unknownAuthor: "Autor Desconhecido",
+            unknownTitle: "Documento Sem Título",
+            loadingDoc: "Carregando documento...",
+            avgRating: "Avaliação Média",
+            yourRating: "A sua Avaliação",
+            rated: (n) => `Avaliou com ${n} estrelas`,
+            rateDoc: "Avalie este documento",
+            oneRating: "avaliação",
+            manyRatings: "avaliações",
+            noComments: "Nenhum comentário ainda",
+            addCommentPlaceholder: "Adicione um Comentário",
+            send: "Enviar",
+            writeComment: "Por favor, escreva um comentário",
+            notAuth: "Utilizador não autenticado",
+            onlyModRemove: "Apenas moderadores podem remover comentários",
+            removeCommentError: "Erro ao remover comentário: ",
+            commentError: "Erro: ",
+            commentLoadError: "Erro ao carregar comentários: ",
+            ratingError: "Erro ao avaliar: ",
+            submitRatingError: "Erro ao submeter avaliação: ",
+            likeError: "Erro ao dar like/dislike: ",
+        },
+        en: {
+            author: "Author:",
+            unknownAuthor: "Unknown Author",
+            unknownTitle: "Untitled Document",
+            loadingDoc: "Loading document...",
+            avgRating: "Average Rating",
+            yourRating: "Your Rating",
+            rated: (n) => `Rated ${n} stars`,
+            rateDoc: "Rate this document",
+            oneRating: "rating",
+            manyRatings: "ratings",
+            noComments: "No comments yet",
+            addCommentPlaceholder: "Add a Comment",
+            send: "Send",
+            writeComment: "Please write a comment",
+            notAuth: "User not authenticated",
+            onlyModRemove: "Only moderators can remove comments",
+            removeCommentError: "Error removing comment: ",
+            commentError: "Error: ",
+            commentLoadError: "Error loading comments: ",
+            ratingError: "Error rating: ",
+            submitRatingError: "Error submitting rating: ",
+            likeError: "Error liking/disliking: ",
+        }
+    };
+    const [currentLang, setCurrentLang] = useState("pt");
     // ⚙️ Estados para gerir o utilizador, comentários, erros e avaliações
         // Geral
         const [erro, setErro] = useState("");                         // Erro
@@ -49,8 +101,8 @@ export default function ConsultarDocumento() {
             const author = searchParams.get("autor");
 
             setPdfUrl(pdf || "");
-            setTitulo(title || "Documento Sem Título");
-            setAutor(author || "Autor Desconhecido");
+            setTitulo(title || texts[currentLang].unknownTitle);
+            setAutor(author || texts[currentLang].unknownAuthor);
         }
     }, [searchParams]);
 
@@ -108,7 +160,7 @@ export default function ConsultarDocumento() {
     
                 setComentarios(data || []);
             } catch (error) {
-                setErro("Erro ao carregar comentários: " + error.message);
+                setErro(texts[currentLang].commentLoadError + error.message);
             }
         };
     
@@ -198,7 +250,7 @@ export default function ConsultarDocumento() {
 
         // 🔍 Verificar se o comentário está vazio
         if (!comentario.trim()) {
-            setErro("Por favor, escreva um comentário");
+            setErro(texts[currentLang].writeComment);
             return;
         }
 
@@ -207,7 +259,7 @@ export default function ConsultarDocumento() {
             // 🔍 Obter os dados do utilizador
             const { data: { user }, error: authError } = await supabase.auth.getUser();
             if (authError) throw authError;
-            if (!user?.id) throw new Error("Utilizador não autenticado");
+            if (!user?.id) throw new Error(texts[currentLang].notAuth);
 
             // 🔍 Obter os detalhes (nome e tipo) do utilizador
             const { data: userData, error: userDataError } = await supabase
@@ -250,7 +302,7 @@ export default function ConsultarDocumento() {
             setErro("");
 
         } catch (error) {
-            setErro("Erro: " + error.message);
+            setErro(texts[currentLang].commentError + error.message);
         }
     };
 
@@ -273,7 +325,7 @@ export default function ConsultarDocumento() {
     
             // 🔍 Verificar se o utilizador é moderador
             if (userDetails.id_tipo_user !== 2) {
-                setErro("Apenas moderadores podem remover comentários");
+                setErro(texts[currentLang].onlyModRemove);
                 return;
             }
     
@@ -290,7 +342,7 @@ export default function ConsultarDocumento() {
             setErro("");
     
         } catch (error) {
-            setErro("Erro ao remover comentário: " + error.message);
+            setErro(texts[currentLang].removeCommentError + error.message);
         }
     };
 
@@ -336,7 +388,7 @@ export default function ConsultarDocumento() {
                 .insert([sendRating]);
 
             if (error) {
-                setErro("Erro ao submeter avaliação: " + error.message);
+                setErro(texts[currentLang].submitRatingError + error.message);
             } else {
 
                 // 🔄 Atualiza o estado com a nova avaliação
@@ -346,7 +398,7 @@ export default function ConsultarDocumento() {
                 await fetchAvaliacaoMedia();
             }
         } catch (error) {
-            setErro("Erro ao avaliar: " + error.message);
+            setErro(texts[currentLang].ratingError + error.message);
         }
     }
 
@@ -427,9 +479,19 @@ export default function ConsultarDocumento() {
             await fetchLikes();
         } catch (error) {
             console.error("Erro completo ao dar like/dislike:", error); // <-- isso ajuda muito!
-            setErro("Erro ao dar like/dislike: " + error.message);
+            setErro(texts[currentLang].likeError + err.message);
         }        
     };
+
+    useEffect(() => {
+        const lang = localStorage.getItem("lang") || "pt";
+        setCurrentLang(lang);
+        const onLangChange = (e) => {
+            if (e.detail && e.detail.lang) setCurrentLang(e.detail.lang);
+        };
+        window.addEventListener("langChange", onLangChange);
+        return () => window.removeEventListener("langChange", onLangChange);
+    }, []);
 
     return (
         <>
@@ -442,13 +504,13 @@ export default function ConsultarDocumento() {
                         <div className="bg-[#012B55] lg:col-span-3 rounded-xl shadow-lg overflow-hidden md:w-9/10">
                             <div className="px-15 py-10 flex mx-auto flex-col">
                                 <h1 className="text-white font-extrabold text-3xl md:text-4xl xl:text-5xl 2xl:text-6xl">{titulo}</h1>
-                                <p className="py-2 text-white text-xl md:text-2xl 2xl:text-3xl"><strong>Autor:</strong> {autor}</p>
+                                <p className="py-2 text-white text-xl md:text-2xl 2xl:text-3xl"><strong>{texts[currentLang].author}</strong> {autor}</p>
 
                                 <div className="mt-2 rounded-lg flex items-center justify-center h-[50vh] md:h-[60vh]">
                                     {isClient && pdfUrl ? (
                                         <PDFViewer url={pdfUrl} />
                                     ) : (
-                                        <p className="text-white text-xl">Carregando documento...</p>
+                                        <p className="text-white text-xl">{texts[currentLang].loadingDoc}</p>
                                     )}
                                 </div>
                             </div>
@@ -460,7 +522,7 @@ export default function ConsultarDocumento() {
                             <div className="py-5 text-center border-b border-gray-600">
                                 <div className="flex flex-col items-center">
                                     <span className="text-white text-2xl font-bold mb-2">
-                                        Avaliação Média
+                                        {texts[currentLang].avgRating}
                                     </span>
                                     <div className="flex justify-center items-center mb-2">
                                         {[...Array(5)].map((_, index) => {
@@ -491,7 +553,7 @@ export default function ConsultarDocumento() {
                                         })}
                                     </div>
                                     <span className="text-white text-xl">
-                                    {avaliacaoMedia.toFixed(1)} ({totalAvaliacoes} {totalAvaliacoes === 1 ? 'avaliação' : 'avaliações'})
+                                    {avaliacaoMedia.toFixed(1)} ({totalAvaliacoes} {totalAvaliacoes === 1 ? texts[currentLang].oneRating : texts[currentLang].manyRatings})
                                     </span>
                                 </div>
                             </div>
@@ -500,7 +562,7 @@ export default function ConsultarDocumento() {
                             <div className="py-5 text-center border-b border-gray-600">
                                 <div className="flex flex-col items-center">
                                     <span className="text-white text-2xl font-bold mb-2">
-                                        A sua Avaliação
+                                        {texts[currentLang].yourRating}
                                     </span>
                                     <div className="flex justify-center">
                                         {[...Array(5)].map((_, index) => {
@@ -535,7 +597,7 @@ export default function ConsultarDocumento() {
                                         })}
                                     </div>
                                     <span className="text-white text-xl mt-2">
-                                        {avaliacao > 0 ? `Avaliou com ${avaliacao} estrelas`  : "Avalie este documento"}
+                                        {avaliacao > 0 ? texts[currentLang].rated(avaliacao) : texts[currentLang].rateDoc}
                                     </span>
                                 </div>
                             </div>
@@ -595,7 +657,7 @@ export default function ConsultarDocumento() {
                                             </div>
                                         ))
                                     ) : (
-                                        <p className="text-white text-center">Nenhum comentário ainda</p>
+                                        <p className="text-white text-center">{texts[currentLang].noComments}</p>
                                     )}
                                 </div>
 
@@ -606,7 +668,7 @@ export default function ConsultarDocumento() {
                                             <form onSubmit={addComment} className="w-full">
                                                 <input
                                                     type="text"
-                                                    placeholder="Adicione um Comentário"
+                                                    placeholder={texts[currentLang].addCommentPlaceholder}
                                                     className="w-full bg-transparent outline-none text-sm sm:text-base"
                                                     value={comentario}
                                                     onChange={(e) => setComentario(e.target.value)}
@@ -618,7 +680,7 @@ export default function ConsultarDocumento() {
                                                 className="p-1 hover:scale-110 transition-transform"
                                                 onClick={addComment}
                                             >
-                                                <Image src="/send.png" width={40} height={40} alt="enviar" />
+                                                <Image src="/send.png" width={40} height={40} alt={texts[currentLang].send} />
                                             </button>
                                         </div>
                                     </div>

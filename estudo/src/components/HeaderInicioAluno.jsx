@@ -8,7 +8,7 @@ export default function HeaderInicio() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isProfileSidebarOpen, setIsProfileSidebarOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState("pt");
+  const [currentLang, setCurrentLang] = useState(() => typeof window !== "undefined" ? localStorage.getItem("lang") || "pt" : "pt");
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
 
   // Textos em ambos os idiomas

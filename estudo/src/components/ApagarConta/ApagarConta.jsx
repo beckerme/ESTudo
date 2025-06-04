@@ -15,6 +15,41 @@ export default function ApagarConta() {
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState([]);
   const [cursos, setCursos] = useState([]);
+  const [currentLang, setCurrentLang] = useState("pt");
+
+  // Textos multilíngues
+  const texts = {
+    pt: {
+      searchPlaceholder: "Pesquisar utilizador",
+      deactivateConfirm: (nome) => `Tens a certeza que queres desativar o utilizador \"${nome}\"?`,
+      deactivateSuccess: (nome) => `Utilizador \"${nome}\" foi desativado.`,
+      type: "Tipo:",
+      types: {
+        1: "Aluno",
+        2: "Moderador",
+        3: "Administrador",
+        4: "Por Validar",
+        5: "Inativo",
+        default: "Desconhecido"
+      },
+      notFound: "Curso não encontrado"
+    },
+    en: {
+      searchPlaceholder: "Search user",
+      deactivateConfirm: (nome) => `Are you sure you want to deactivate user \"${nome}\"?`,
+      deactivateSuccess: (nome) => `User \"${nome}\" has been deactivated.`,
+      type: "Type:",
+      types: {
+        1: "Student",
+        2: "Moderator",
+        3: "Administrator",
+        4: "Pending Validation",
+        5: "Inactive",
+        default: "Unknown"
+      },
+      notFound: "Course not found"
+    }
+  };
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -48,46 +83,38 @@ export default function ApagarConta() {
     fetchCursos();
   }, []);
 
+  useEffect(() => {
+    const lang = localStorage.getItem("lang") || "pt";
+    setCurrentLang(lang);
+    const onLangChange = (e) => {
+      if (e.detail && e.detail.lang) setCurrentLang(e.detail.lang);
+    };
+    window.addEventListener("langChange", onLangChange);
+    return () => window.removeEventListener("langChange", onLangChange);
+  }, []);
+
   const getCursoNomeById = (id) => {
     const curso = cursos.find((c) => c.id_curso === id);
-    return curso ? curso.nome_curso : "Curso não encontrado";
+    return curso ? curso.nome_curso : texts[currentLang].notFound;
   };
 
   const handleDeactivateUser = async (id_user, nome) => {
-    const confirm = window.confirm(
-      `Tens a certeza que queres desativar o utilizador "${nome}"?`
-    );
-
+    const confirm = window.confirm(texts[currentLang].deactivateConfirm(nome));
     if (!confirm) return;
-
     const { error } = await supabase
       .from("user_details")
       .update({ id_tipo_user: 5 }) // 5 = user_inativo
       .eq("id_user", id_user);
-
     if (error) {
       console.error("Erro ao desativar utilizador:", error);
     } else {
-      alert(`Utilizador "${nome}" foi desativado.`);
+      alert(texts[currentLang].deactivateSuccess(nome));
       window.location.reload();
     }
   };
 
   const getTipoUserTexto = (tipo) => {
-    switch (tipo) {
-      case 1:
-        return "Aluno";
-      case 2:
-        return "Moderador";
-      case 3:
-        return "Administrador";
-      case 4:
-        return "Por Validar";
-      case 5:
-        return "Inativo";
-      default:
-        return "Desconhecido";
-    }
+    return texts[currentLang].types[tipo] || texts[currentLang].types.default;
   };
 
   return (
@@ -101,7 +128,7 @@ export default function ApagarConta() {
           <div className="relative mb-4">
             <input
               type="text"
-              placeholder="Pesquisar utilizador"
+              placeholder={texts[currentLang].searchPlaceholder}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full p-3 pl-4 rounded-lg bg-green-500 text-white placeholder-white focus:outline-none"
@@ -127,7 +154,7 @@ export default function ApagarConta() {
                       <h3 className="text-white font-bold">{user.nome}</h3>
                       <p className="text-gray-300 text-sm">{user.email}</p>
                       <p className="text-gray-400 text-xs">{getCursoNomeById(user.id_curso)}</p>
-                      <p className="text-gray-300 text-xs italic">Tipo: {getTipoUserTexto(user.id_tipo_user)}</p>
+                      <p className="text-gray-300 text-xs italic">{texts[currentLang].type} {getTipoUserTexto(user.id_tipo_user)}</p>
                     </div>
                   </div>
 
@@ -135,7 +162,7 @@ export default function ApagarConta() {
                     <XCircle
                       className="text-red-500 cursor-pointer"
                       size={24}
-                      title="Desativar utilizador"
+                      title={texts[currentLang].deactivateConfirm(user.nome)}
                       onClick={() => handleDeactivateUser(user.id_user, user.nome)}
                     />
                   </div>

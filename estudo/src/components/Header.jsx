@@ -14,8 +14,9 @@ const kanit = Kanit({
 });
 
 export default function Header() {
-  const [currentLang, setCurrentLang] = useState("pt");
+  const [currentLang, setCurrentLang] = useState(() => typeof window !== "undefined" ? localStorage.getItem("lang") || "pt" : "pt");
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   // Textos multilíngues para o header
   const texts = {
@@ -30,6 +31,7 @@ export default function Header() {
   };
 
   useEffect(() => {
+    setIsClient(true);
     const lang = localStorage.getItem("lang") || "pt";
     setCurrentLang(lang);
     const onLangChange = (e) => {
@@ -45,6 +47,8 @@ export default function Header() {
     localStorage.setItem("lang", lang);
     window.dispatchEvent(new CustomEvent("langChange", { detail: { lang } }));
   };
+
+  if (!isClient) return null;
 
   return (
     <div className={kanit.className}>

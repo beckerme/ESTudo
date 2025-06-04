@@ -7,7 +7,7 @@ export default function HeaderInicioAdmin() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isProfileSidebarOpen, setIsProfileSidebarOpen] = useState(false);
   const [isLogoutPopUpOpen, setIsLogoutPopUpOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState("pt");
+  const [currentLang, setCurrentLang] = useState(() => typeof window !== "undefined" ? localStorage.getItem("lang") || "pt" : "pt");
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
 
   const router = useRouter();
@@ -20,7 +20,30 @@ export default function HeaderInicioAdmin() {
   const toggleLang = (lang) => {
     setCurrentLang(lang);
     setIsLangDropdownOpen(false);
-    // Aqui você pode adicionar lógica para trocar o idioma global do site
+    localStorage.setItem("lang", lang);
+    window.dispatchEvent(new CustomEvent("langChange", { detail: { lang } }));
+  };
+
+  // Textos multilíngues para o menu lateral
+  const texts = {
+    pt: {
+      profileMenu: "Menu do Perfil",
+      profiles: "Perfis",
+      approveRegistrations: "Aprovar Registos",
+      statistics: "Estatísticas",
+      logout: "Sair",
+      confirmLogout: "Tem a certeza que deseja sair?",
+      cancel: "Cancelar"
+    },
+    en: {
+      profileMenu: "Profile Menu",
+      profiles: "Profiles",
+      approveRegistrations: "Approve Registrations",
+      statistics: "Statistics",
+      logout: "Logout",
+      confirmLogout: "Are you sure you want to logout?",
+      cancel: "Cancel"
+    }
   };
 
   return (
@@ -107,17 +130,17 @@ export default function HeaderInicioAdmin() {
 
         <div className="flex flex-col items-center mt-10">
           <Image src="/user.png" width={100} height={100} alt="foto do utilizador" className="rounded-full mb-6" />
-          <h2 className="text-xl font-bold mb-6">Menu do Perfil</h2>
+          <h2 className="text-xl font-bold mb-6">{texts[currentLang].profileMenu}</h2>
           <ul className="space-y-4 text-center">
-            <li><a href="apagar-conta" className="hover:underline">Perfis</a></li>
-            <li><a href="validar-registo" className="hover:underline">Aprovar Registos</a></li>
-             <li><a href="estatisticas" className="hover:underline">Estatisticas</a></li>
+            <li><a href="apagar-conta" className="hover:underline">{texts[currentLang].profiles}</a></li>
+            <li><a href="validar-registo" className="hover:underline">{texts[currentLang].approveRegistrations}</a></li>
+            <li><a href="estatisticas" className="hover:underline">{texts[currentLang].statistics}</a></li>
             <li>
               <button
                 onClick={() => setIsLogoutPopUpOpen(true)}
                 className="hover:underline text-red-600"
               >
-                Sair
+                {texts[currentLang].logout}
               </button>
             </li>
           </ul>
@@ -144,19 +167,19 @@ export default function HeaderInicioAdmin() {
           {/* PopUp de logout */}
           <div className="fixed inset-0 z-70 flex items-center justify-center pointer-events-none">
             <div className="relative z-70 bg-white rounded-xl shadow-lg p-8 w-[90%] max-w-md text-center pointer-events-auto">
-              <h3 className="text-xl font-semibold mb-4">Tem a certeza que deseja sair?</h3>
+              <h3 className="text-xl font-semibold mb-4">{texts[currentLang].confirmLogout}</h3>
               <div className="flex justify-center gap-4 mt-6">
                 <button
                   className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
                   onClick={() => setIsLogoutPopUpOpen(false)}
                 >
-                  Cancelar
+                  {texts[currentLang].cancel}
                 </button>
                 <button
                   className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
                   onClick={handleLogout}
                 >
-                  Sair
+                  {texts[currentLang].logout}
                 </button>
               </div>
             </div>

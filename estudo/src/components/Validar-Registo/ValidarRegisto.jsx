@@ -18,6 +18,47 @@ export default function ValidarRegisto() {
   const [users, setUsers] = useState([]);
   const [cursos, setCursos] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentLang, setCurrentLang] = useState("pt");
+
+  // Textos multilíngues
+  const texts = {
+    pt: {
+      searchPlaceholder: "Pesquisa por nome",
+      pending: (n) => `${n} registos pendentes de validação`,
+      noPending: "Não existem registos pendentes de validação.",
+      reject: "Rejeitar",
+      validate: "Validar",
+      deactivateSuccess: (nome) => `Utilizador ${nome} desativado com sucesso!`,
+      deactivateError: "Erro ao desativar utilizador",
+      validateSuccess: (nome) => `Utilizador ${nome} validado e notificado com sucesso!`,
+      validatePartial: (nome) => `Utilizador ${nome} validado, mas houve um problema ao enviar a notificação.`,
+      validateError: "Erro ao validar utilizador",
+      notFound: "Curso não encontrado"
+    },
+    en: {
+      searchPlaceholder: "Search by name",
+      pending: (n) => `${n} registrations pending validation`,
+      noPending: "No registrations pending validation.",
+      reject: "Reject",
+      validate: "Validate",
+      deactivateSuccess: (nome) => `User ${nome} deactivated successfully!`,
+      deactivateError: "Error deactivating user",
+      validateSuccess: (nome) => `User ${nome} validated and notified successfully!`,
+      validatePartial: (nome) => `User ${nome} validated, but there was a problem sending the notification.`,
+      validateError: "Error validating user",
+      notFound: "Course not found"
+    }
+  };
+
+  useEffect(() => {
+    const lang = localStorage.getItem("lang") || "pt";
+    setCurrentLang(lang);
+    const onLangChange = (e) => {
+      if (e.detail && e.detail.lang) setCurrentLang(e.detail.lang);
+    };
+    window.addEventListener("langChange", onLangChange);
+    return () => window.removeEventListener("langChange", onLangChange);
+  }, []);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -53,7 +94,7 @@ export default function ValidarRegisto() {
 
   const getCursoNomeById = (id) => {
     const curso = cursos.find((c) => c.id_curso === id);
-    return curso ? curso.nome_curso : "Curso não encontrado";
+    return curso ? curso.nome_curso : texts[currentLang].notFound;
   };
 
   const handleValidateUser = async (id_user, email, nome) => {
@@ -73,7 +114,7 @@ export default function ValidarRegisto() {
 
     if (error) {
       console.error("Erro ao validar utilizador:", error);
-      toast.error("Erro ao validar utilizador");
+      toast.error(texts[currentLang].validateError);
       setIsLoading(false);
       return;
     }
@@ -86,11 +127,9 @@ export default function ValidarRegisto() {
     );
 
     if (notificationSent) {
-      toast.success(`Utilizador ${nome} validado e notificado com sucesso!`);
+      toast.success(texts[currentLang].validateSuccess(nome));
     } else {
-      toast.success(
-        `Utilizador ${nome} validado, mas houve um problema ao enviar a notificação.`
-      );
+      toast.success(texts[currentLang].validatePartial(nome));
     }
 
     const { data: updatedUsers } = await supabase
@@ -115,9 +154,9 @@ export default function ValidarRegisto() {
 
     if (error) {
       console.error("Erro ao desativar utilizador:", error);
-      toast.error("Erro ao desativar utilizador");
+      toast.error(texts[currentLang].deactivateError);
     } else {
-      toast.success(`Utilizador ${nome} desativado com sucesso!`);
+      toast.success(texts[currentLang].deactivateSuccess(nome));
 
       const { data: updatedUsers } = await supabase
         .from("user_details")
@@ -206,7 +245,7 @@ export default function ValidarRegisto() {
           <div className="relative mb-4">
             <input
               type="text"
-              placeholder="Pesquisa por nome"
+              placeholder={texts[currentLang].searchPlaceholder}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full p-3 pl-4 rounded-lg bg-green-500 text-white placeholder-white focus:outline-none"
@@ -216,15 +255,14 @@ export default function ValidarRegisto() {
 
           <div className="bg-blue-800 rounded-lg p-3 mb-4 text-center">
             <p className="text-white">
-              <span className="font-bold">{users.length}</span> registos
-              pendentes de validação
+              <span className="font-bold">{users.length}</span> {texts[currentLang].pending(users.length)}
             </p>
           </div>
 
           <div className="max-h-[60vh] overflow-y-auto space-y-4 pr-2">
             {users.length === 0 ? (
               <div className="bg-blue-700 p-4 rounded-lg text-center text-white">
-                Não existem registos pendentes de validação.
+                {texts[currentLang].noPending}
               </div>
             ) : (
               users
@@ -257,7 +295,7 @@ export default function ValidarRegisto() {
                         }
                       >
                         <XCircle size={16} />
-                        <span>Rejeitar</span>
+                        <span>{texts[currentLang].reject}</span>
                       </button>
                       <button
                         disabled={isLoading}
@@ -271,7 +309,7 @@ export default function ValidarRegisto() {
                         }
                       >
                         <CheckCircle size={16} />
-                        <span>Validar</span>
+                        <span>{texts[currentLang].validate}</span>
                       </button>
                     </div>
                   </div>
