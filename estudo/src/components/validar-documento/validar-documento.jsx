@@ -1,6 +1,7 @@
 "use client";
 
 import { Kanit } from "next/font/google";
+import Image from "next/image";
 import Header from "../HeaderInicioMod";
 import { useState, useEffect } from "react";
 import { Search, XCircle, CheckCircle } from "lucide-react";
@@ -121,7 +122,7 @@ export default function ValidarDocumento() {
       console.error("Erro ao atualizar tag:", error.message);
     } else {
       setShowModal(false);
-      fetchDocuments(); // Refresh docs
+      fetchDocuments();
     }
   };
 
@@ -210,6 +211,12 @@ export default function ValidarDocumento() {
     }
   };
 
+  // Documentos filtrados
+  const filteredDocuments = documents.filter((doc) =>
+    doc.name.toLowerCase().includes(search.toLowerCase()) ||
+    (doc.author && doc.author.toLowerCase().includes(search.toLowerCase()))
+  );
+
   useEffect(() => {
     fetchDocuments();
   }, []);
@@ -231,70 +238,80 @@ export default function ValidarDocumento() {
       </div>
 
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="w-full max-w-4xl bg-blue-900 p-6 rounded-xl shadow-lg">
+        <div className="w-full max-w-4xl p-6">
           <div className="relative mb-4">
             <input
               type="text"
               placeholder={texts[currentLang].searchPlaceholder}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full p-3 pl-4 rounded-lg bg-green-500 text-white placeholder-white focus:outline-none"
+              className="w-full p-3 pl-4 bg-[#007CC2] rounded-3xl text-white placeholder-white focus:outline-none"
             />
             <Search className="absolute right-3 top-3 text-white" />
           </div>
 
-          <div className="max-h-[60vh] overflow-y-auto space-y-4 pr-2">
-            {documents
-              .filter((doc) =>
-                doc.name.toLowerCase().includes(search.toLowerCase())
-              )
-              .map((doc) => (
-                <div
-                  key={doc.id}
-                  className="flex flex-col sm:flex-row items-center justify-between bg-blue-600 p-4 rounded-lg shadow-md"
-                >
-                  <div className="flex items-center gap-4 w-full sm:w-auto">
-                    <div className="w-12 h-12 rounded-full bg-white"></div>
-                    <div className="text-center sm:text-left">
-                      <h3 className="text-white font-bold">{doc.name}</h3>
-                      <p className="text-gray-300 text-sm">{doc.author}</p>
-                      <p className="text-gray-400 text-xs">
-                        {texts[currentLang].state} {getEstadoLabel(doc.estado)}
-                      </p>
+          <div className="flex flex-col items-center w-full">
+            <div className="space-y-4 w-full max-w-4xl">
+              {filteredDocuments.length === 0 ? (
+                <div className="text-center p-4 text-gray-600 w-full">
+                </div>
+              ) : (
+                filteredDocuments.map((doc) => (
+                  <div
+                    key={doc.id}
+                    className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200"
+                  >
+                    {/* ESTRUTURA CORRIGIDA */}
+                    <div className="flex justify-between items-start">
+                      {/* Área de texto do documento */}
+                      <div className="flex-1 mr-4 min-w-0">
+                        <h2 className="text-lg font-semibold text-gray-900 mb-1 truncate" title={doc.name}>
+                          {doc.name}
+                        </h2>
+                        <p className="text-sm text-gray-600 mb-2">
+                          {doc.author}
+                        </p>
+                        <p className="text-xs text-gray-500 mb-1">
+                          {doc.created_at}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {getEstadoLabel(doc.estado)}
+                        </p>
+                      </div>
+
+                      {/* Botões de ação */}
+                      <div className="flex gap-2 flex-shrink-0">
+                        <button
+                          onClick={() => openTagEditor(doc)}
+                          className="bg-yellow-400 hover:bg-yellow-500 text-black px-3 py-1 rounded-md text-sm font-medium"
+                        >
+                          Editar Tags
+                        </button>
+
+                        {doc.estado === ESTADOS.por_aprovar && (
+                          <>
+                            <XCircle
+                              className="text-red-500 cursor-pointer"
+                              size={24}
+                              onClick={() =>
+                                updateEstado(doc.id, ESTADOS.nao_aprovado)
+                              }
+                            />
+                            <CheckCircle
+                              className="text-green-500 cursor-pointer"
+                              size={24}
+                              onClick={() =>
+                                updateEstado(doc.id, ESTADOS.publicado)
+                              }
+                            />
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
-
-                  <div className="flex gap-2 mt-2 sm:mt-0">
-                    <button
-                      onClick={() => openTagEditor(doc)}
-                      className="bg-yellow-400 hover:bg-yellow-500 text-black px-3 py-1 rounded-md text-sm font-medium"
-                    >
-                      {texts[currentLang].editTags}
-                    </button>
-
-                    {doc.estado === ESTADOS.por_aprovar && (
-                      <>
-                        <XCircle
-                          className="text-red-500 cursor-pointer"
-                          size={24}
-                          title={texts[currentLang].reject}
-                          onClick={() =>
-                            updateEstado(doc.id, ESTADOS.nao_aprovado)
-                          }
-                        />
-                        <CheckCircle
-                          className="text-green-500 cursor-pointer"
-                          size={24}
-                          title={texts[currentLang].approve}
-                          onClick={() =>
-                            updateEstado(doc.id, ESTADOS.publicado)
-                          }
-                        />
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>

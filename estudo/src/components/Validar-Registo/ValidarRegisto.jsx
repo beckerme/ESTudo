@@ -232,6 +232,12 @@ export default function ValidarRegisto() {
     }
   };
 
+  // Filtered users based on search
+  const filteredUsers = users.filter((user) =>
+    user.nome.toLowerCase().includes(search.toLowerCase()) ||
+    user.email.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <>
       <Toaster position="top-right" />
@@ -241,80 +247,81 @@ export default function ValidarRegisto() {
       </div>
 
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="w-full max-w-4xl bg-blue-900 p-6 rounded-xl shadow-lg">
+        <div className="w-full max-w-4xl p-6">
           <div className="relative mb-4">
             <input
               type="text"
-              placeholder={texts[currentLang].searchPlaceholder}
+              placeholder="Pesquisa"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full p-3 pl-4 rounded-lg bg-green-500 text-white placeholder-white focus:outline-none"
+              className="w-full p-3 pl-4 bg-[#007CC2] rounded-3xl text-white placeholder-white focus:outline-none"
             />
             <Search className="absolute right-3 top-3 text-white" />
           </div>
 
-          <div className="bg-blue-800 rounded-lg p-3 mb-4 text-center">
-            <p className="text-white">
-              <span className="font-bold">{users.length}</span> {texts[currentLang].pending(users.length)}
-            </p>
-          </div>
-
-          <div className="max-h-[60vh] overflow-y-auto space-y-4 pr-2">
-            {users.length === 0 ? (
-              <div className="bg-blue-700 p-4 rounded-lg text-center text-white">
-                {texts[currentLang].noPending}
-              </div>
-            ) : (
-              users
-                .filter((user) =>
-                  user.nome.toLowerCase().includes(search.toLowerCase())
-                )
-                .map((user, index) => (
+          <div className="flex flex-col items-center w-full">
+            <div className="space-y-4 w-full max-w-4xl">
+              {filteredUsers.length === 0 ? (
+                <div className="text-center p-4 text-gray-600 w-full">
+                  {users.length === 0 ? (
+                    "Não existem registos pendentes de validação."
+                  ) : (
+                    "Nenhum utilizador encontrado."
+                  )}
+                </div>
+              ) : (
+                filteredUsers.map((user) => (
                   <div
-                    key={index}
-                    className="flex flex-col sm:flex-row items-center justify-between bg-blue-600 p-4 rounded-lg shadow-md"
+                    key={user.id_user}
+                    className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200"
                   >
-                    <div className="flex items-center gap-4 w-full sm:w-auto">
-                      <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
-                        {user.nome.charAt(0).toUpperCase()}
+                    <div className="flex justify-between items-start">
+                      {/* User information area */}
+                      <div className="flex items-center gap-4 flex-1 mr-4 min-w-0">
+                        <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold flex-shrink-0">
+                          {user.nome.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h2 className="text-lg font-semibold text-gray-900 mb-1 truncate" title={user.nome}>
+                            {user.nome}
+                          </h2>
+                          <p className="text-sm text-gray-600 mb-2 truncate" title={user.email}>
+                            {user.email}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {getCursoNomeById(user.id_curso)}
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-center sm:text-left">
-                        <h3 className="text-white font-bold">{user.nome}</h3>
-                        <p className="text-gray-300 text-sm">{user.email}</p>
-                        <p className="text-gray-400 text-xs">
-                          {getCursoNomeById(user.id_curso)}
-                        </p>
+
+                      {/* Action buttons */}
+                      <div className="flex gap-2 flex-shrink-0">
+                          <>
+                            <XCircle
+                              className="text-red-500 cursor-pointer"
+                              size={24}
+                              onClick={() =>
+                                handleDeactivateUser(user.id_user, user.nome)
+                              }
+                            />
+                            <CheckCircle
+                              className="text-green-500 cursor-pointer"
+                              size={24}
+                              onClick={() =>
+                                handleValidateUser(
+                                  user.id_user,
+                                  user.email,
+                                  user.nome
+                                )
+                              }
+                            />
+                          </>
                       </div>
-                    </div>
-                    <div className="flex gap-2 mt-2 sm:mt-0">
-                      <button
-                        disabled={isLoading}
-                        className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md transition-colors"
-                        onClick={() =>
-                          handleDeactivateUser(user.id_user, user.nome)
-                        }
-                      >
-                        <XCircle size={16} />
-                        <span>{texts[currentLang].reject}</span>
-                      </button>
-                      <button
-                        disabled={isLoading}
-                        className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md transition-colors"
-                        onClick={() =>
-                          handleValidateUser(
-                            user.id_user,
-                            user.email,
-                            user.nome
-                          )
-                        }
-                      >
-                        <CheckCircle size={16} />
-                        <span>{texts[currentLang].validate}</span>
-                      </button>
                     </div>
                   </div>
                 ))
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
