@@ -2,7 +2,7 @@
 // Imports Next
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Import Fonte
 import { Kanit } from "next/font/google";
@@ -17,10 +17,33 @@ export default function Header() {
   const [currentLang, setCurrentLang] = useState("pt");
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
 
+  // Textos multilíngues para o header
+  const texts = {
+    pt: {
+      appTitle: "ESTudo",
+      appSubtitle: "Aplicação Universitária de Partilha de Documentos"
+    },
+    en: {
+      appTitle: "ESTudo",
+      appSubtitle: "University Document-Sharing App"
+    }
+  };
+
+  useEffect(() => {
+    const lang = localStorage.getItem("lang") || "pt";
+    setCurrentLang(lang);
+    const onLangChange = (e) => {
+      if (e.detail && e.detail.lang) setCurrentLang(e.detail.lang);
+    };
+    window.addEventListener("langChange", onLangChange);
+    return () => window.removeEventListener("langChange", onLangChange);
+  }, []);
+
   const toggleLang = (lang) => {
     setCurrentLang(lang);
     setIsLangDropdownOpen(false);
-    // Aqui você pode adicionar lógica para trocar o idioma global do site
+    localStorage.setItem("lang", lang);
+    window.dispatchEvent(new CustomEvent("langChange", { detail: { lang } }));
   };
 
   return (
@@ -41,8 +64,8 @@ export default function Header() {
 
           {/* Title and Subtitle */}
           <div>
-            <h1 className="lg:text-7xl text-5xl">ESTudo</h1>
-            <p className="lg:text-md">University Document-Sharing App</p>
+            <h1 className="lg:text-7xl text-5xl">{texts[currentLang].appTitle}</h1>
+            <p className="lg:text-md">{texts[currentLang].appSubtitle}</p>
           </div>
           {/* Seletor de Idioma */}
           <div className="relative ml-4">

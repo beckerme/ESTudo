@@ -1,8 +1,11 @@
+'use client';
+
 // Imports relacionados com páginas e fontes
 import { Kanit } from "next/font/google";
 import Header from "../Header";
 import Saudacao from "../Saudacao";
 import LoginForm from "./LoginForm";
+import { useEffect, useState } from "react";
 
 // Fonte
 const kanit = Kanit({
@@ -11,6 +14,20 @@ const kanit = Kanit({
 });
 
 export default function Login() {
+  const [currentLang, setCurrentLang] = useState("pt");
+  const texts = {
+    pt: { login: "Login" },
+    en: { login: "Login" }
+  };
+  useEffect(() => {
+    const lang = localStorage.getItem("lang") || "pt";
+    setCurrentLang(lang);
+    const onLangChange = (e) => {
+      if (e.detail && e.detail.lang) setCurrentLang(e.detail.lang);
+    };
+    window.addEventListener("langChange", onLangChange);
+    return () => window.removeEventListener("langChange", onLangChange);
+  }, []);
   return (
     <>
       {/* Logótipo */}
@@ -20,14 +37,14 @@ export default function Login() {
           
           {/* Coluna de Saudação */}
           <div className="bg-[#012B55] p-6 md:px-0 rounded-2xl shadow-md items-center flex">
-            <Saudacao />
+            <Saudacao currentLang={currentLang} />
           </div>
           
           {/* Coluna do Formulário de Login */}
           <div className="bg-[#28BCD3] p-6 pt-10 rounded-2xl shadow-md">
             <h2 className="text-5xl 2xl:text-6xl md:py-0
-            text-black text-center">Login</h2>
-            <LoginForm />
+            text-black text-center">{texts[currentLang].login}</h2>
+            <LoginForm currentLang={currentLang} />
           </div>
         </div>
       </div>

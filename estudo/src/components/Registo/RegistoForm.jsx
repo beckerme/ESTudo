@@ -8,7 +8,7 @@ import supabase from "@/app/config/supabaseClient";
 
 const inter = Inter({ subsets: ["latin"], weight: "400" });
 
-export default function RegistoForm() {
+export default function RegistoForm({ currentLang = "pt" }) {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -135,17 +135,17 @@ export default function RegistoForm() {
     e.preventDefault();
 
     if (!email || !password || !confirmarPassword || !nome || !curso) {
-      setErro("Por favor, preencha todos os campos!");
+      setErro(texts[currentLang].fillAll);
       return;
     }
 
     if (!email.endsWith("@ipcb.pt") && !email.endsWith("@ipcbcampus.pt")) {
-      setErro("Apenas emails institucionais (@ipcb.pt ou @ipcbcampus.pt) são permitidos!");
+      setErro(texts[currentLang].onlyInstitutional);
       return;
     }
 
     if (password !== confirmarPassword) {
-      setErro("As passwords não coincidem!");
+      setErro(texts[currentLang].passwordMismatch);
       return;
     }
 
@@ -155,7 +155,7 @@ export default function RegistoForm() {
     });
 
     if (authError) {
-      setErro("Erro ao registrar: " + authError.message);
+      setErro(texts[currentLang].signupError + authError.message);
       return;
     }
 
@@ -166,7 +166,7 @@ export default function RegistoForm() {
       .single();
 
     if (cursoError || !cursoData) {
-      setErro("Erro ao obter o ID do curso: " + (cursoError?.message || "Curso não encontrado."));
+      setErro(texts[currentLang].courseIdError + (cursoError?.message || "Curso não encontrado."));
       return;
     }
 
@@ -181,7 +181,7 @@ export default function RegistoForm() {
     });
 
     if (insertError) {
-      setErro("Erro ao salvar os dados: " + insertError.message);
+      setErro(texts[currentLang].saveError + insertError.message);
       return;
     }
 
@@ -193,6 +193,42 @@ export default function RegistoForm() {
     router.push("/login");
   };
 
+  // Textos multilíngues
+  const texts = {
+    pt: {
+      name: "Nome",
+      email: "Email",
+      password: "Password",
+      confirmPassword: "Confirme a Password",
+      selectCourse: "Selecione um curso",
+      register: "Registar",
+      alreadyAccount: "Já tem conta?",
+      loginHere: "Faça login aqui",
+      fillAll: "Por favor, preencha todos os campos!",
+      onlyInstitutional: "Apenas emails institucionais (@ipcb.pt ou @ipcbcampus.pt) são permitidos!",
+      passwordMismatch: "As passwords não coincidem!",
+      signupError: "Erro ao registrar: ",
+      courseIdError: "Erro ao obter o ID do curso: ",
+      saveError: "Erro ao salvar os dados: ",
+    },
+    en: {
+      name: "Name",
+      email: "Email",
+      password: "Password",
+      confirmPassword: "Confirm Password",
+      selectCourse: "Select a course",
+      register: "Register",
+      alreadyAccount: "Already have an account?",
+      loginHere: "Login here",
+      fillAll: "Please fill in all fields!",
+      onlyInstitutional: "Only institutional emails (@ipcb.pt or @ipcbcampus.pt) are allowed!",
+      passwordMismatch: "Passwords do not match!",
+      signupError: "Registration error: ",
+      courseIdError: "Error getting course ID: ",
+      saveError: "Error saving data: ",
+    }
+  };
+
   return (
     <div className="w-full max-w-2xl rounded-xl overflow-hidden">
       <form onSubmit={handleSubmit} className="px-8 py-10 w-full">
@@ -201,48 +237,46 @@ export default function RegistoForm() {
             {erro}
           </div>
         )}
-
         <div className="space-y-4">
           <input
             type="text"
             value={nome}
             onChange={(e) => setNome(e.target.value)}
-            placeholder="Nome"
+            placeholder={texts[currentLang].name}
             className="bg-white rounded-xl w-full pl-4 h-12"
           />
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
+            placeholder={texts[currentLang].email}
             className="bg-white rounded-xl w-full pl-4 h-12"
           />
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
+            placeholder={texts[currentLang].password}
             className="bg-white rounded-xl w-full pl-4 h-12"
           />
           <input
             type="password"
             value={confirmarPassword}
             onChange={(e) => setConfirmarPassword(e.target.value)}
-            placeholder="Confirme a Password"
+            placeholder={texts[currentLang].confirmPassword}
             className="bg-white rounded-xl w-full pl-4 h-12"
           />
           <select
             value={curso}
             onChange={(e) => setCurso(e.target.value)}
             className="bg-white rounded-xl w-full pl-4 h-12"
-            placeholder="Selecione um curso"
+            placeholder={texts[currentLang].selectCourse}
           >
             <option 
               value="" disabled
-              placeholder="Selecione um curso" 
-            >Selecione um curso
+              placeholder={texts[currentLang].selectCourse}
+            >{texts[currentLang].selectCourse}
             </option>
-
             {cursos.map((cursoItem) => (
               <option key={`curso-${cursoItem.id_curso}`} value={cursoItem.nome_curso}>
                 {cursoItem.nome_curso}
@@ -250,18 +284,16 @@ export default function RegistoForm() {
             ))}
           </select>
         </div>
-
         <button
           type="submit"
           className="mt-6 bg-blue-600 text-white rounded-xl w-full h-12 hover:bg-blue-700 transition"
         >
-          Registar
+          {texts[currentLang].register}
         </button>
-
         <p className="text-center mt-8">
-          Já tem conta?{" "}
+          {texts[currentLang].alreadyAccount} {" "}
           <Link href="/login" className="text-blue-600 underline">
-            Faça login aqui
+            {texts[currentLang].loginHere}
           </Link>
         </p>
       </form>

@@ -1,8 +1,11 @@
+'use client';
+
 // Imports relacionados com páginas e fontes
 import { Kanit } from "next/font/google";
 import Header from "../Header";
 import Saudacao from "../Saudacao";
 import RegistoForm from "./RegistoForm";
+import { useEffect, useState } from "react";
 
 // Fonte
 const kanit = Kanit({
@@ -11,6 +14,20 @@ const kanit = Kanit({
 });
 
 export default function RegisterPage() {
+  const [currentLang, setCurrentLang] = useState("pt");
+  const texts = {
+    pt: { register: "Registo" },
+    en: { register: "Register" }
+  };
+  useEffect(() => {
+    const lang = localStorage.getItem("lang") || "pt";
+    setCurrentLang(lang);
+    const onLangChange = (e) => {
+      if (e.detail && e.detail.lang) setCurrentLang(e.detail.lang);
+    };
+    window.addEventListener("langChange", onLangChange);
+    return () => window.removeEventListener("langChange", onLangChange);
+  }, []);
   return (
 
     <>
@@ -21,14 +38,14 @@ export default function RegisterPage() {
               
               {/* Coluna de Saudação */}
               <div className="bg-[#012B55] p-6 md:px-0 rounded-2xl shadow-md items-center flex">
-                <Saudacao />
+                <Saudacao currentLang={currentLang} />
               </div>
               
-              {/* Coluna do Formulário de Login */}
+              {/* Coluna do Formulário de Registo */}
               <div className="bg-[#28BCD3] p-6 pt-10 rounded-2xl shadow-md">
                 <h2 className="text-5xl 2xl:text-6xl md:py-0
-                text-black text-center">Registo</h2>
-                <RegistoForm />
+                text-black text-center">{texts[currentLang].register}</h2>
+                <RegistoForm currentLang={currentLang} />
               </div>
             </div>
           </div>
