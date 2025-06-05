@@ -12,64 +12,6 @@ const kanit = Kanit({ subsets: ["latin"], weight: "400" });
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#9c27b0", "#e91e63"];
 
 export default function AdminDashboard() {
-  // Traduções multilíngues
-  const texts = {
-    pt: {
-      adminPanel: "Painel de Administração",
-      export: "Exportar Dados",
-      exportTitle: "Exportar dados para Excel",
-      numDocs: "Nº de Documentos",
-      numUsers: "Nº de Utilizadores",
-      userList: "Lista de Utilizadores",
-      name: "Nome",
-      email: "Email",
-      type: "Tipo",
-      noUsers: "Nenhum utilizador encontrado.",
-      docsByTag: "Distribuição de Documentos por Tag",
-      tagName: "Nome da Tag",
-      numDocsCol: "Número de Documentos",
-      noTagData: "Sem dados para mostrar o gráfico.",
-      noDocs: "Nenhum documento encontrado",
-      total: "TOTAL",
-      summary: "Resumo",
-      summarySheet: "Resumo",
-      exportInfo: "Informações de Exportação",
-      exportDate: "Data de Exportação:",
-      exportTime: "Hora de Exportação:",
-      detailedStats: "Estatísticas Detalhadas",
-      numTags: "Número de Tags Diferentes",
-      exportSuccess: (file, users, tags, docs) => `Dados exportados com sucesso!\n\nArquivo: ${file}\n\nConteúdo exportado:\n• ${users} utilizadores\n• ${tags} tags de documentos\n• ${docs} documentos totais`,
-      exportError: "Erro ao exportar dados. Verifique os dados e tente novamente."
-    },
-    en: {
-      adminPanel: "Admin Panel",
-      export: "Export Data",
-      exportTitle: "Export data to Excel",
-      numDocs: "Number of Documents",
-      numUsers: "Number of Users",
-      userList: "User List",
-      name: "Name",
-      email: "Email",
-      type: "Type",
-      noUsers: "No users found.",
-      docsByTag: "Document Distribution by Tag",
-      tagName: "Tag Name",
-      numDocsCol: "Number of Documents",
-      noTagData: "No data to display the chart.",
-      noDocs: "No documents found",
-      total: "TOTAL",
-      summary: "Summary",
-      summarySheet: "Summary",
-      exportInfo: "Export Information",
-      exportDate: "Export Date:",
-      exportTime: "Export Time:",
-      detailedStats: "Detailed Statistics",
-      numTags: "Number of Different Tags",
-      exportSuccess: (file, users, tags, docs) => `Data exported successfully!\n\nFile: ${file}\n\nExported content:\n• ${users} users\n• ${tags} document tags\n• ${docs} total documents`,
-      exportError: "Error exporting data. Check the data and try again."
-    }
-  };
-  const [currentLang, setCurrentLang] = useState("pt");
   const [numDocs, setNumDocs] = useState(0);
   const [numUsers, setNumUsers] = useState(0);
   const [users, setUsers] = useState([]);
@@ -132,9 +74,9 @@ export default function AdminDashboard() {
 
       // Folha 1: Lista de Utilizadores (exatamente como na tabela da imagem)
       const usersData = [
-        [texts[currentLang].userList, "", ""],
+        ["Lista de Utilizadores", "", ""],
         ["", "", ""],
-        [texts[currentLang].name, texts[currentLang].email, texts[currentLang].type]
+        ["Nome", "Email", "Tipo"]
       ];
 
       // Adicionar dados dos utilizadores exatamente como aparecem na tabela
@@ -148,7 +90,7 @@ export default function AdminDashboard() {
 
       // Se não houver utilizadores
       if (users.length === 0) {
-        usersData.push([texts[currentLang].noUsers, "", ""]);
+        usersData.push(["Nenhum utilizador encontrado", "", ""]);
       }
 
       const usersSheet = XLSX.utils.aoa_to_sheet(usersData);
@@ -160,13 +102,13 @@ export default function AdminDashboard() {
         { width: 15 }  // Tipo
       ];
       
-      XLSX.utils.book_append_sheet(workbook, usersSheet, texts[currentLang].userList);
+      XLSX.utils.book_append_sheet(workbook, usersSheet, "Lista de Utilizadores");
 
       // Folha 2: Distribuição de Documentos por Tag (dados do gráfico)
       const docsData = [
-        [texts[currentLang].docsByTag, ""],
+        ["Distribuição de Documentos por Tag", ""],
         ["", ""],
-        [texts[currentLang].tagName, texts[currentLang].numDocsCol]
+        ["Nome da Tag", "Número de Documentos"]
       ];
 
       // Adicionar dados das tags exatamente como no gráfico
@@ -179,13 +121,13 @@ export default function AdminDashboard() {
 
       // Se não houver dados de tags
       if (docsByTag.length === 0) {
-        docsData.push([texts[currentLang].noDocs, "0"]);
+        docsData.push(["Nenhum documento encontrado", "0"]);
       }
 
       // Adicionar linha de total
       if (docsByTag.length > 0) {
         docsData.push(["", ""]);
-        docsData.push([texts[currentLang].total, numDocs]);
+        docsData.push(["TOTAL", numDocs]);
       }
 
       const docsSheet = XLSX.utils.aoa_to_sheet(docsData);
@@ -196,21 +138,21 @@ export default function AdminDashboard() {
         { width: 20 }  // Número de Documentos
       ];
       
-      XLSX.utils.book_append_sheet(workbook, docsSheet, texts[currentLang].docsByTag);
+      XLSX.utils.book_append_sheet(workbook, docsSheet, "Documentos por Tag");
 
       // Folha 3: Resumo Geral com métricas principais
       const summaryData = [
-        [texts[currentLang].numDocs, texts[currentLang].numUsers],
+        ["Nº de Documentos", "Nº de Utilizadores"],
         [numDocs, numUsers],
         ["", ""],
-        [texts[currentLang].exportInfo, ""],
-        [texts[currentLang].exportDate, new Date().toLocaleDateString(currentLang === "pt" ? "pt-PT" : "en-US")],
-        [texts[currentLang].exportTime, new Date().toLocaleTimeString(currentLang === "pt" ? "pt-PT" : "en-US")],
+        ["Informações de Exportação", ""],
+        ["Data de Exportação:", new Date().toLocaleDateString("pt-PT")],
+        ["Hora de Exportação:", new Date().toLocaleTimeString("pt-PT")],
         ["", ""],
-        [texts[currentLang].detailedStats, ""],
-        [texts[currentLang].numDocs, numDocs],
-        [texts[currentLang].numUsers, numUsers],
-        [texts[currentLang].numTags, docsByTag.length]
+        ["Estatísticas Detalhadas", ""],
+        ["Número Total de Documentos", numDocs],
+        ["Número Total de Utilizadores", numUsers],
+        ["Número de Tags Diferentes", docsByTag.length]
       ];
       
       const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
@@ -221,7 +163,7 @@ export default function AdminDashboard() {
         { width: 15 }
       ];
       
-      XLSX.utils.book_append_sheet(workbook, summarySheet, texts[currentLang].summarySheet);
+      XLSX.utils.book_append_sheet(workbook, summarySheet, "Resumo");
 
       // Gerar o arquivo e fazer download
       const timestamp = new Date().toISOString().split('T')[0];
@@ -229,26 +171,16 @@ export default function AdminDashboard() {
       XLSX.writeFile(workbook, fileName);
       
       // Mostrar mensagem de sucesso
-      alert(texts[currentLang].exportSuccess(fileName, users.length, docsByTag.length, numDocs));
+      alert(`Dados exportados com sucesso!\n\nArquivo: ${fileName}\n\nConteúdo exportado:\n• ${users.length} utilizadores\n• ${docsByTag.length} tags de documentos\n• ${numDocs} documentos totais`);
       
     } catch (error) {
       console.error("Erro ao exportar para Excel:", error);
-      alert(texts[currentLang].exportError);
+      alert("Erro ao exportar dados. Verifique os dados e tente novamente.");
     }
   };
 
   useEffect(() => {
     fetchCountsAndUsers();
-  }, []);
-
-  useEffect(() => {
-    const lang = localStorage.getItem("lang") || "pt";
-    setCurrentLang(lang);
-    const onLangChange = (e) => {
-      if (e.detail && e.detail.lang) setCurrentLang(e.detail.lang);
-    };
-    window.addEventListener("langChange", onLangChange);
-    return () => window.removeEventListener("langChange", onLangChange);
   }, []);
 
   return (
@@ -259,13 +191,13 @@ export default function AdminDashboard() {
 
       <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
         <div className="w-full max-w-5xl bg-white p-6 rounded-xl shadow-lg space-y-6">
-          <h1 className="text-2xl font-bold text-blue-900">{texts[currentLang].adminPanel}</h1>
+          <h1 className="text-2xl font-bold text-blue-900">Painel de Administração</h1>
 
           {/* Botão de Exportação */}
             <button
               onClick={exportToExcel}
               className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md transition-colors duration-200 flex items-center gap-2"
-              title={texts[currentLang].exportTitle}
+              title="Exportar dados para Excel"
             >
               <svg 
                 className="w-5 h-5" 
@@ -280,29 +212,30 @@ export default function AdminDashboard() {
                   d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" 
                 />
               </svg>
-              {texts[currentLang].export}
+              Exportar Dados
             </button>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="bg-blue-100 text-blue-900 p-4 rounded-lg shadow">
-              <h2 className="text-lg font-semibold">{texts[currentLang].numDocs}</h2>
+              <h2 className="text-lg font-semibold">Nº de Documentos</h2>
               <p className="text-3xl">{numDocs}</p>
             </div>
+
             <div className="bg-green-100 text-green-900 p-4 rounded-lg shadow">
-              <h2 className="text-lg font-semibold">{texts[currentLang].numUsers}</h2>
+              <h2 className="text-lg font-semibold">Nº de Utilizadores</h2>
               <p className="text-3xl">{numUsers}</p>
             </div>
           </div>
 
           <div className="mt-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">{texts[currentLang].userList}</h2>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Lista de Utilizadores</h2>
             <div className="overflow-x-auto">
               <table className="min-w-full bg-white border border-gray-300">
                 <thead className="bg-gray-100">
                   <tr>
-                    <th className="text-left py-2 px-4 border-b">{texts[currentLang].name}</th>
-                    <th className="text-left py-2 px-4 border-b">{texts[currentLang].email}</th>
-                    <th className="text-left py-2 px-4 border-b">{texts[currentLang].type}</th>
+                    <th className="text-left py-2 px-4 border-b">Nome</th>
+                    <th className="text-left py-2 px-4 border-b">Email</th>
+                    <th className="text-left py-2 px-4 border-b">Tipo</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -316,7 +249,7 @@ export default function AdminDashboard() {
                   {users.length === 0 && (
                     <tr>
                       <td colSpan="3" className="text-center py-4 text-gray-500">
-                        {texts[currentLang].noUsers}
+                        Nenhum utilizador encontrado.
                       </td>
                     </tr>
                   )}
@@ -326,7 +259,7 @@ export default function AdminDashboard() {
           </div>
 
           <div className="mt-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">{texts[currentLang].docsByTag}</h2>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Distribuição de Documentos por Tag</h2>
             <div className="flex justify-center">
               {docsByTag.length > 0 ? (
                 <PieChart width={400} height={300}>
@@ -348,7 +281,7 @@ export default function AdminDashboard() {
                   <Legend />
                 </PieChart>
               ) : (
-                <p className="text-gray-500">{texts[currentLang].noTagData}</p>
+                <p className="text-gray-500">Sem dados para mostrar o gráfico.</p>
               )}
             </div>
           </div>
